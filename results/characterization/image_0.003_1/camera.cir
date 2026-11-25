@@ -1,0 +1,412 @@
+.title Global shutter discrete camera
+.subckt pixel pd vr rst refgate siggate sel br bs ci=100p ch=1n rl=1e12 dark=2p vos=100u
+
+Dphoto 0 pd silicon
+Cjunction pd 0 4p
+Cintegration pd 0 {ci}
+Rintegration pd 0 10T
+Idark pd 0 {dark}
+Ibias pd 0 0.2p
+Sreset pd vr rst 0 gate
+Bfollower buf 0 V=max(0.02,min(v(vdd)-0.02,v(pd)+vos))
+Rout buf drive 50
+
+Shr drive hr refgate 0 gate
+Chr hr 0 {ch}
+Rhr hr 0 {rl}
+Ihr hr 0 0.2p
+Ehr sourcehr 0 hr 0 1
+Routhr sourcehr pinhr 50
+Sreadhr pinhr br sel 0 gate
+
+Shs drive hs siggate 0 gate
+Chs hs 0 {ch}
+Rhs hs 0 {rl}
+Ihs hs 0 0.2p
+Ehs sourcehs 0 hs 0 1
+Rouths sourcehs pinhs 50
+Sreadhs pinhs bs sel 0 gate
+
+.ends pixel
+
+.subckt amp plus minus out
+
+* Dominant pole, 4 MHz GBW, 100k DC gain, 4 V/us slew, rail clamps
+Bgm 0 pole I=max(-400u,min(400u,2.513m*(v(plus,minus)+20u)))
+Rp pole 0 39.79meg
+Cp pole 0 100p
+Brails pole 0 I=(min(0,v(pole)-0.02)+max(0,v(pole)-v(vdd)+0.02))/2
+Ebuf drive 0 pole 0 1
+Rout drive out 10
+
+.ends amp
+Vdd vdd 0 5.0
+Vr vr 0 3.0
+Vrst rst 0 PWL(0 3.3 2.5e-05 3.3 2.502e-05 0)
+Vrg rg 0 PWL(0 0 5e-06 0 5.02e-06 3.3 2.4e-05 3.3 2.402e-05 0)
+Vsg sg 0 PWL(0 0 0.003017 0 0.00301702 3.3 0.003025 3.3 0.00302502 0)
+Iphoto0 pd0 0 0.0
+Vsel0 sel0 0 PWL(0 0 0.00303 0 0.00303002 3.3 0.0030699 3.3 0.00306992 0)
+X0 pd0 vr rst rg sg sel0 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto1 pd1 0 2.25e-09
+Vsel1 sel1 0 PWL(0 0 0.00307 0 0.00307002 3.3 0.0031099 3.3 0.00310992 0)
+X1 pd1 vr rst rg sg sel1 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto2 pd2 0 4.5e-09
+Vsel2 sel2 0 PWL(0 0 0.00311 0 0.00311002 3.3 0.0031499 3.3 0.00314992 0)
+X2 pd2 vr rst rg sg sel2 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto3 pd3 0 6.749999999999999e-09
+Vsel3 sel3 0 PWL(0 0 0.00315 0 0.00315002 3.3 0.0031899 3.3 0.00318992 0)
+X3 pd3 vr rst rg sg sel3 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto4 pd4 0 9e-09
+Vsel4 sel4 0 PWL(0 0 0.00319 0 0.00319002 3.3 0.0032299 3.3 0.00322992 0)
+X4 pd4 vr rst rg sg sel4 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto5 pd5 0 1.1250000000000001e-08
+Vsel5 sel5 0 PWL(0 0 0.00323 0 0.00323002 3.3 0.0032699 3.3 0.00326992 0)
+X5 pd5 vr rst rg sg sel5 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto6 pd6 0 1.3499999999999998e-08
+Vsel6 sel6 0 PWL(0 0 0.00327 0 0.00327002 3.3 0.0033099 3.3 0.00330992 0)
+X6 pd6 vr rst rg sg sel6 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto7 pd7 0 1.5750000000000002e-08
+Vsel7 sel7 0 PWL(0 0 0.00331 0 0.00331002 3.3 0.0033499 3.3 0.00334992 0)
+X7 pd7 vr rst rg sg sel7 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto8 pd8 0 1.8e-08
+Vsel8 sel8 0 PWL(0 0 0.00335 0 0.00335002 3.3 0.0033899 3.3 0.00338992 0)
+X8 pd8 vr rst rg sg sel8 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto9 pd9 0 2.025e-08
+Vsel9 sel9 0 PWL(0 0 0.00339 0 0.00339002 3.3 0.0034299 3.3 0.00342992 0)
+X9 pd9 vr rst rg sg sel9 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto10 pd10 0 0.0
+Vsel10 sel10 0 PWL(0 0 0.00343 0 0.00343002 3.3 0.0034699 3.3 0.00346992 0)
+X10 pd10 vr rst rg sg sel10 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto11 pd11 0 2.25e-09
+Vsel11 sel11 0 PWL(0 0 0.00347 0 0.00347002 3.3 0.0035099 3.3 0.00350992 0)
+X11 pd11 vr rst rg sg sel11 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto12 pd12 0 4.5e-09
+Vsel12 sel12 0 PWL(0 0 0.00351 0 0.00351002 3.3 0.0035499 3.3 0.00354992 0)
+X12 pd12 vr rst rg sg sel12 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto13 pd13 0 6.749999999999999e-09
+Vsel13 sel13 0 PWL(0 0 0.00355 0 0.00355002 3.3 0.0035899 3.3 0.00358992 0)
+X13 pd13 vr rst rg sg sel13 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto14 pd14 0 9e-09
+Vsel14 sel14 0 PWL(0 0 0.00359 0 0.00359002 3.3 0.0036299 3.3 0.00362992 0)
+X14 pd14 vr rst rg sg sel14 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto15 pd15 0 1.1250000000000001e-08
+Vsel15 sel15 0 PWL(0 0 0.00363 0 0.00363002 3.3 0.0036699 3.3 0.00366992 0)
+X15 pd15 vr rst rg sg sel15 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto16 pd16 0 1.3499999999999998e-08
+Vsel16 sel16 0 PWL(0 0 0.00367 0 0.00367002 3.3 0.0037099 3.3 0.00370992 0)
+X16 pd16 vr rst rg sg sel16 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto17 pd17 0 1.5750000000000002e-08
+Vsel17 sel17 0 PWL(0 0 0.00371 0 0.00371002 3.3 0.0037499 3.3 0.00374992 0)
+X17 pd17 vr rst rg sg sel17 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto18 pd18 0 1.8e-08
+Vsel18 sel18 0 PWL(0 0 0.00375 0 0.00375002 3.3 0.0037899 3.3 0.00378992 0)
+X18 pd18 vr rst rg sg sel18 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto19 pd19 0 2.025e-08
+Vsel19 sel19 0 PWL(0 0 0.00379 0 0.00379002 3.3 0.0038299 3.3 0.00382992 0)
+X19 pd19 vr rst rg sg sel19 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto20 pd20 0 0.0
+Vsel20 sel20 0 PWL(0 0 0.00383 0 0.00383002 3.3 0.0038699 3.3 0.00386992 0)
+X20 pd20 vr rst rg sg sel20 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto21 pd21 0 2.25e-09
+Vsel21 sel21 0 PWL(0 0 0.00387 0 0.00387002 3.3 0.0039099 3.3 0.00390992 0)
+X21 pd21 vr rst rg sg sel21 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto22 pd22 0 4.5e-09
+Vsel22 sel22 0 PWL(0 0 0.00391 0 0.00391002 3.3 0.0039499 3.3 0.00394992 0)
+X22 pd22 vr rst rg sg sel22 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto23 pd23 0 6.749999999999999e-09
+Vsel23 sel23 0 PWL(0 0 0.00395 0 0.00395002 3.3 0.0039899 3.3 0.00398992 0)
+X23 pd23 vr rst rg sg sel23 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto24 pd24 0 9e-09
+Vsel24 sel24 0 PWL(0 0 0.00399 0 0.00399002 3.3 0.0040299 3.3 0.00402992 0)
+X24 pd24 vr rst rg sg sel24 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto25 pd25 0 1.1250000000000001e-08
+Vsel25 sel25 0 PWL(0 0 0.00403 0 0.00403002 3.3 0.0040699 3.3 0.00406992 0)
+X25 pd25 vr rst rg sg sel25 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto26 pd26 0 1.3499999999999998e-08
+Vsel26 sel26 0 PWL(0 0 0.00407 0 0.00407002 3.3 0.0041099 3.3 0.00410992 0)
+X26 pd26 vr rst rg sg sel26 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto27 pd27 0 1.5750000000000002e-08
+Vsel27 sel27 0 PWL(0 0 0.00411 0 0.00411002 3.3 0.0041499 3.3 0.00414992 0)
+X27 pd27 vr rst rg sg sel27 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto28 pd28 0 1.8e-08
+Vsel28 sel28 0 PWL(0 0 0.00415 0 0.00415002 3.3 0.0041899 3.3 0.00418992 0)
+X28 pd28 vr rst rg sg sel28 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto29 pd29 0 2.025e-08
+Vsel29 sel29 0 PWL(0 0 0.00419 0 0.00419002 3.3 0.0042299 3.3 0.00422992 0)
+X29 pd29 vr rst rg sg sel29 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto30 pd30 0 0.0
+Vsel30 sel30 0 PWL(0 0 0.00423 0 0.00423002 3.3 0.0042699 3.3 0.00426992 0)
+X30 pd30 vr rst rg sg sel30 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto31 pd31 0 2.25e-09
+Vsel31 sel31 0 PWL(0 0 0.00427 0 0.00427002 3.3 0.0043099 3.3 0.00430992 0)
+X31 pd31 vr rst rg sg sel31 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto32 pd32 0 4.5e-09
+Vsel32 sel32 0 PWL(0 0 0.00431 0 0.00431002 3.3 0.0043499 3.3 0.00434992 0)
+X32 pd32 vr rst rg sg sel32 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto33 pd33 0 6.749999999999999e-09
+Vsel33 sel33 0 PWL(0 0 0.00435 0 0.00435002 3.3 0.0043899 3.3 0.00438992 0)
+X33 pd33 vr rst rg sg sel33 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto34 pd34 0 9e-09
+Vsel34 sel34 0 PWL(0 0 0.00439 0 0.00439002 3.3 0.0044299 3.3 0.00442992 0)
+X34 pd34 vr rst rg sg sel34 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto35 pd35 0 1.1250000000000001e-08
+Vsel35 sel35 0 PWL(0 0 0.00443 0 0.00443002 3.3 0.0044699 3.3 0.00446992 0)
+X35 pd35 vr rst rg sg sel35 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto36 pd36 0 1.3499999999999998e-08
+Vsel36 sel36 0 PWL(0 0 0.00447 0 0.00447002 3.3 0.0045099 3.3 0.00450992 0)
+X36 pd36 vr rst rg sg sel36 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto37 pd37 0 1.5750000000000002e-08
+Vsel37 sel37 0 PWL(0 0 0.00451 0 0.00451002 3.3 0.0045499 3.3 0.00454992 0)
+X37 pd37 vr rst rg sg sel37 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto38 pd38 0 1.8e-08
+Vsel38 sel38 0 PWL(0 0 0.00455 0 0.00455002 3.3 0.0045899 3.3 0.00458992 0)
+X38 pd38 vr rst rg sg sel38 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto39 pd39 0 2.025e-08
+Vsel39 sel39 0 PWL(0 0 0.00459 0 0.00459002 3.3 0.0046299 3.3 0.00462992 0)
+X39 pd39 vr rst rg sg sel39 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto40 pd40 0 0.0
+Vsel40 sel40 0 PWL(0 0 0.00463 0 0.00463002 3.3 0.0046699 3.3 0.00466992 0)
+X40 pd40 vr rst rg sg sel40 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto41 pd41 0 2.25e-09
+Vsel41 sel41 0 PWL(0 0 0.00467 0 0.00467002 3.3 0.0047099 3.3 0.00470992 0)
+X41 pd41 vr rst rg sg sel41 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto42 pd42 0 4.5e-09
+Vsel42 sel42 0 PWL(0 0 0.00471 0 0.00471002 3.3 0.0047499 3.3 0.00474992 0)
+X42 pd42 vr rst rg sg sel42 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto43 pd43 0 6.749999999999999e-09
+Vsel43 sel43 0 PWL(0 0 0.00475 0 0.00475002 3.3 0.0047899 3.3 0.00478992 0)
+X43 pd43 vr rst rg sg sel43 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto44 pd44 0 9e-09
+Vsel44 sel44 0 PWL(0 0 0.00479 0 0.00479002 3.3 0.0048299 3.3 0.00482992 0)
+X44 pd44 vr rst rg sg sel44 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto45 pd45 0 1.1250000000000001e-08
+Vsel45 sel45 0 PWL(0 0 0.00483 0 0.00483002 3.3 0.0048699 3.3 0.00486992 0)
+X45 pd45 vr rst rg sg sel45 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto46 pd46 0 1.3499999999999998e-08
+Vsel46 sel46 0 PWL(0 0 0.00487 0 0.00487002 3.3 0.0049099 3.3 0.00490992 0)
+X46 pd46 vr rst rg sg sel46 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto47 pd47 0 1.5750000000000002e-08
+Vsel47 sel47 0 PWL(0 0 0.00491 0 0.00491002 3.3 0.0049499 3.3 0.00494992 0)
+X47 pd47 vr rst rg sg sel47 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto48 pd48 0 1.8e-08
+Vsel48 sel48 0 PWL(0 0 0.00495 0 0.00495002 3.3 0.0049899 3.3 0.00498992 0)
+X48 pd48 vr rst rg sg sel48 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto49 pd49 0 2.025e-08
+Vsel49 sel49 0 PWL(0 0 0.00499 0 0.00499002 3.3 0.0050299 3.3 0.00502992 0)
+X49 pd49 vr rst rg sg sel49 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto50 pd50 0 0.0
+Vsel50 sel50 0 PWL(0 0 0.00503 0 0.00503002 3.3 0.0050699 3.3 0.00506992 0)
+X50 pd50 vr rst rg sg sel50 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto51 pd51 0 2.25e-09
+Vsel51 sel51 0 PWL(0 0 0.00507 0 0.00507002 3.3 0.0051099 3.3 0.00510992 0)
+X51 pd51 vr rst rg sg sel51 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto52 pd52 0 4.5e-09
+Vsel52 sel52 0 PWL(0 0 0.00511 0 0.00511002 3.3 0.0051499 3.3 0.00514992 0)
+X52 pd52 vr rst rg sg sel52 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto53 pd53 0 6.749999999999999e-09
+Vsel53 sel53 0 PWL(0 0 0.00515 0 0.00515002 3.3 0.0051899 3.3 0.00518992 0)
+X53 pd53 vr rst rg sg sel53 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto54 pd54 0 9e-09
+Vsel54 sel54 0 PWL(0 0 0.00519 0 0.00519002 3.3 0.0052299 3.3 0.00522992 0)
+X54 pd54 vr rst rg sg sel54 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto55 pd55 0 1.1250000000000001e-08
+Vsel55 sel55 0 PWL(0 0 0.00523 0 0.00523002 3.3 0.0052699 3.3 0.00526992 0)
+X55 pd55 vr rst rg sg sel55 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto56 pd56 0 1.3499999999999998e-08
+Vsel56 sel56 0 PWL(0 0 0.00527 0 0.00527002 3.3 0.0053099 3.3 0.00530992 0)
+X56 pd56 vr rst rg sg sel56 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto57 pd57 0 1.5750000000000002e-08
+Vsel57 sel57 0 PWL(0 0 0.00531 0 0.00531002 3.3 0.0053499 3.3 0.00534992 0)
+X57 pd57 vr rst rg sg sel57 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto58 pd58 0 1.8e-08
+Vsel58 sel58 0 PWL(0 0 0.00535 0 0.00535002 3.3 0.0053899 3.3 0.00538992 0)
+X58 pd58 vr rst rg sg sel58 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto59 pd59 0 2.025e-08
+Vsel59 sel59 0 PWL(0 0 0.00539 0 0.00539002 3.3 0.0054299 3.3 0.00542992 0)
+X59 pd59 vr rst rg sg sel59 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto60 pd60 0 0.0
+Vsel60 sel60 0 PWL(0 0 0.00543 0 0.00543002 3.3 0.0054699 3.3 0.00546992 0)
+X60 pd60 vr rst rg sg sel60 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto61 pd61 0 2.25e-09
+Vsel61 sel61 0 PWL(0 0 0.00547 0 0.00547002 3.3 0.0055099 3.3 0.00550992 0)
+X61 pd61 vr rst rg sg sel61 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto62 pd62 0 4.5e-09
+Vsel62 sel62 0 PWL(0 0 0.00551 0 0.00551002 3.3 0.0055499 3.3 0.00554992 0)
+X62 pd62 vr rst rg sg sel62 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto63 pd63 0 6.749999999999999e-09
+Vsel63 sel63 0 PWL(0 0 0.00555 0 0.00555002 3.3 0.0055899 3.3 0.00558992 0)
+X63 pd63 vr rst rg sg sel63 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto64 pd64 0 9e-09
+Vsel64 sel64 0 PWL(0 0 0.00559 0 0.00559002 3.3 0.0056299 3.3 0.00562992 0)
+X64 pd64 vr rst rg sg sel64 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto65 pd65 0 1.1250000000000001e-08
+Vsel65 sel65 0 PWL(0 0 0.00563 0 0.00563002 3.3 0.0056699 3.3 0.00566992 0)
+X65 pd65 vr rst rg sg sel65 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto66 pd66 0 1.3499999999999998e-08
+Vsel66 sel66 0 PWL(0 0 0.00567 0 0.00567002 3.3 0.0057099 3.3 0.00570992 0)
+X66 pd66 vr rst rg sg sel66 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto67 pd67 0 1.5750000000000002e-08
+Vsel67 sel67 0 PWL(0 0 0.00571 0 0.00571002 3.3 0.0057499 3.3 0.00574992 0)
+X67 pd67 vr rst rg sg sel67 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto68 pd68 0 1.8e-08
+Vsel68 sel68 0 PWL(0 0 0.00575 0 0.00575002 3.3 0.0057899 3.3 0.00578992 0)
+X68 pd68 vr rst rg sg sel68 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto69 pd69 0 2.025e-08
+Vsel69 sel69 0 PWL(0 0 0.00579 0 0.00579002 3.3 0.0058299 3.3 0.00582992 0)
+X69 pd69 vr rst rg sg sel69 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto70 pd70 0 0.0
+Vsel70 sel70 0 PWL(0 0 0.00583 0 0.00583002 3.3 0.0058699 3.3 0.00586992 0)
+X70 pd70 vr rst rg sg sel70 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto71 pd71 0 2.25e-09
+Vsel71 sel71 0 PWL(0 0 0.00587 0 0.00587002 3.3 0.0059099 3.3 0.00590992 0)
+X71 pd71 vr rst rg sg sel71 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto72 pd72 0 4.5e-09
+Vsel72 sel72 0 PWL(0 0 0.00591 0 0.00591002 3.3 0.0059499 3.3 0.00594992 0)
+X72 pd72 vr rst rg sg sel72 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto73 pd73 0 6.749999999999999e-09
+Vsel73 sel73 0 PWL(0 0 0.00595 0 0.00595002 3.3 0.0059899 3.3 0.00598992 0)
+X73 pd73 vr rst rg sg sel73 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto74 pd74 0 9e-09
+Vsel74 sel74 0 PWL(0 0 0.00599 0 0.00599002 3.3 0.0060299 3.3 0.00602992 0)
+X74 pd74 vr rst rg sg sel74 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto75 pd75 0 1.1250000000000001e-08
+Vsel75 sel75 0 PWL(0 0 0.00603 0 0.00603002 3.3 0.0060699 3.3 0.00606992 0)
+X75 pd75 vr rst rg sg sel75 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto76 pd76 0 1.3499999999999998e-08
+Vsel76 sel76 0 PWL(0 0 0.00607 0 0.00607002 3.3 0.0061099 3.3 0.00610992 0)
+X76 pd76 vr rst rg sg sel76 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto77 pd77 0 1.5750000000000002e-08
+Vsel77 sel77 0 PWL(0 0 0.00611 0 0.00611002 3.3 0.0061499 3.3 0.00614992 0)
+X77 pd77 vr rst rg sg sel77 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto78 pd78 0 1.8e-08
+Vsel78 sel78 0 PWL(0 0 0.00615 0 0.00615002 3.3 0.0061899 3.3 0.00618992 0)
+X78 pd78 vr rst rg sg sel78 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto79 pd79 0 2.025e-08
+Vsel79 sel79 0 PWL(0 0 0.00619 0 0.00619002 3.3 0.0062299 3.3 0.00622992 0)
+X79 pd79 vr rst rg sg sel79 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto80 pd80 0 0.0
+Vsel80 sel80 0 PWL(0 0 0.00623 0 0.00623002 3.3 0.0062699 3.3 0.00626992 0)
+X80 pd80 vr rst rg sg sel80 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto81 pd81 0 2.25e-09
+Vsel81 sel81 0 PWL(0 0 0.00627 0 0.00627002 3.3 0.0063099 3.3 0.00630992 0)
+X81 pd81 vr rst rg sg sel81 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto82 pd82 0 4.5e-09
+Vsel82 sel82 0 PWL(0 0 0.00631 0 0.00631002 3.3 0.0063499 3.3 0.00634992 0)
+X82 pd82 vr rst rg sg sel82 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto83 pd83 0 6.749999999999999e-09
+Vsel83 sel83 0 PWL(0 0 0.00635 0 0.00635002 3.3 0.0063899 3.3 0.00638992 0)
+X83 pd83 vr rst rg sg sel83 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto84 pd84 0 9e-09
+Vsel84 sel84 0 PWL(0 0 0.00639 0 0.00639002 3.3 0.0064299 3.3 0.00642992 0)
+X84 pd84 vr rst rg sg sel84 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto85 pd85 0 1.1250000000000001e-08
+Vsel85 sel85 0 PWL(0 0 0.00643 0 0.00643002 3.3 0.0064699 3.3 0.00646992 0)
+X85 pd85 vr rst rg sg sel85 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto86 pd86 0 1.3499999999999998e-08
+Vsel86 sel86 0 PWL(0 0 0.00647 0 0.00647002 3.3 0.0065099 3.3 0.00650992 0)
+X86 pd86 vr rst rg sg sel86 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto87 pd87 0 1.5750000000000002e-08
+Vsel87 sel87 0 PWL(0 0 0.00651 0 0.00651002 3.3 0.0065499 3.3 0.00654992 0)
+X87 pd87 vr rst rg sg sel87 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto88 pd88 0 1.8e-08
+Vsel88 sel88 0 PWL(0 0 0.00655 0 0.00655002 3.3 0.0065899 3.3 0.00658992 0)
+X88 pd88 vr rst rg sg sel88 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto89 pd89 0 2.025e-08
+Vsel89 sel89 0 PWL(0 0 0.00659 0 0.00659002 3.3 0.0066299 3.3 0.00662992 0)
+X89 pd89 vr rst rg sg sel89 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto90 pd90 0 0.0
+Vsel90 sel90 0 PWL(0 0 0.00663 0 0.00663002 3.3 0.0066699 3.3 0.00666992 0)
+X90 pd90 vr rst rg sg sel90 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto91 pd91 0 2.25e-09
+Vsel91 sel91 0 PWL(0 0 0.00667 0 0.00667002 3.3 0.0067099 3.3 0.00670992 0)
+X91 pd91 vr rst rg sg sel91 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto92 pd92 0 4.5e-09
+Vsel92 sel92 0 PWL(0 0 0.00671 0 0.00671002 3.3 0.0067499 3.3 0.00674992 0)
+X92 pd92 vr rst rg sg sel92 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto93 pd93 0 6.749999999999999e-09
+Vsel93 sel93 0 PWL(0 0 0.00675 0 0.00675002 3.3 0.0067899 3.3 0.00678992 0)
+X93 pd93 vr rst rg sg sel93 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto94 pd94 0 9e-09
+Vsel94 sel94 0 PWL(0 0 0.00679 0 0.00679002 3.3 0.0068299 3.3 0.00682992 0)
+X94 pd94 vr rst rg sg sel94 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto95 pd95 0 1.1250000000000001e-08
+Vsel95 sel95 0 PWL(0 0 0.00683 0 0.00683002 3.3 0.0068699 3.3 0.00686992 0)
+X95 pd95 vr rst rg sg sel95 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto96 pd96 0 1.3499999999999998e-08
+Vsel96 sel96 0 PWL(0 0 0.00687 0 0.00687002 3.3 0.0069099 3.3 0.00690992 0)
+X96 pd96 vr rst rg sg sel96 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto97 pd97 0 1.5750000000000002e-08
+Vsel97 sel97 0 PWL(0 0 0.00691 0 0.00691002 3.3 0.0069499 3.3 0.00694992 0)
+X97 pd97 vr rst rg sg sel97 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto98 pd98 0 1.8e-08
+Vsel98 sel98 0 PWL(0 0 0.00695 0 0.00695002 3.3 0.0069899 3.3 0.00698992 0)
+X98 pd98 vr rst rg sg sel98 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto99 pd99 0 2.025e-08
+Vsel99 sel99 0 PWL(0 0 0.00699 0 0.00699002 3.3 0.0070299 3.3 0.00702992 0)
+X99 pd99 vr rst rg sg sel99 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+
+.global vdd
+.model gate SW(Ron=50 Roff=1e14 Vt=1.65 Vh=0.05)
+.model silicon D(Is=1e-14 N=1.2)
+
+* Voltage-controlled channel for static mode and feedback selections
+.subckt select a b control
+Bchannel a b I=v(a,b)*(v(control)>1.65 ? 0.02 : 1e-14)
+.ends select
+Vblack black 0 0.1
+Vnom nominal 0 3.0
+Vcds cg 0 3.3
+Vbypass bg 0 0
+Xref br ref cg select
+Xnom nominal ref bg select
+Rplus ref plus 1meg
+Rblack plus black 1meg
+Rminus bs minus 1meg
+Rdiff cds minus 1meg
+Xdiff plus minus cds amp
+Xgain cds fb pga amp
+Vmulti multi 0 0
+Xbottom bot black multi select
+Rg fb bot 9950
+Vg1 g1 0 3.3
+Rf1 pga tap1 0.01
+Xf1 tap1 fb g1 select
+Vg2 g2 0 0
+Rf2 pga tap2 9950
+Xf2 tap2 fb g2 select
+Vg4 g4 0 0
+Rf4 pga tap4 29950
+Xf4 tap4 fb g4 select
+Vg8 g8 0 0
+Rf8 pga tap8 69950
+Xf8 tap8 fb g8 select
+Vg16 g16 0 0
+Rf16 pga tap16 149950
+Xf16 tap16 fb g16 select
+
+.model comp D(Is=1n N=1.5)
+Rcomp pga knee 10k
+Dcomp knee black comp
+Xcomp knee compbuf compbuf amp
+Vlin lin 0 3.3
+Vlog logsel 0 0
+Xlin pga mode lin select
+Xlog compbuf mode logsel select
+Rfilter mode filt 9950
+Cfilter filt 0 1.9999999999999998e-10
+Xfilter filt filtered filtered amp
+Xdriver filtered driven driven amp
+Riso driven adc 47
+Cadc adc 0 20p
+Radc adc 0 10meg
+
+Rbr br 0 1T
+Rbs bs 0 1T
+Cbr br 0 30p
+Cbs bs 0 30p
+.temp 27.0
+.options gmin=1e-15 reltol=2e-5 abstol=1e-14 vntol=1e-7 method=gear
+.save v(pd0) v(x0.hr) v(x0.hs) v(br) v(bs) v(cds) v(pga) v(filtered) v(adc)
+.tran 4.000000000000001e-06 0.00703 0 0.0001
+.end

@@ -1,0 +1,17 @@
+power (nW),mode,ADC voltage (V)
+0,reference linear,0.10023132508083647
+11.25,reference linear,0.5869263656945364
+22.5,reference linear,1.0736203177756745
+45,reference linear,2.047009764033189
+0,reference compressed,0.10025027302689402
+11.25,reference compressed,0.46506039691856166
+22.5,reference compressed,0.5235262757297776
+45,reference compressed,0.5620530806313977
+0,components linear,0.10707766864896534
+11.25,components linear,0.5726524635915111
+22.5,components linear,1.0392618329165306
+45,components linear,1.9657764325860105
+0,components compressed,0.1070796791095168
+11.25,components compressed,0.4801169488640815
+22.5,components compressed,0.564545954944286
+45,components compressed,0.6244613410246964

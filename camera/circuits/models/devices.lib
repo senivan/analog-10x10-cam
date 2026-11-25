@@ -1,0 +1,13 @@
+* ALD1106PBL. Published level-1 fit, overlap in F/m; terminal parasitics below.
+.model ald_n nmos(level=1 vto=.7 kp=245u gamma=.85 phi=.9 lambda=.029
++ cbd=.5p cbs=.5p cgdo=5n cgso=5n tox=30n is=10p tnom=25)
+.subckt pass a b g
+Mchannel a g b 0 ald_n w=20u l=10u
+Rgate g 0 10T
+Cpackage g 0 .6p
+.ends pass
+
+.subckt pin an ca params: idark=70p
+.model s5971 D(is={idark+1e-18} n=1.2 cjo=11.73p vj=.7 m=.5 rs=5 tnom=25)
+Dpin an ca s5971
+.ends pin

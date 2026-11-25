@@ -1,0 +1,1232 @@
+.title Discrete component global shutter
+Xb0 adc0 cds0 pga0 filtered0 br0 bs0 bank0
+* TL081 OPERATIONAL AMPLIFIER "MACROMODEL" SUBCIRCUIT
+* CREATED USING PARTS RELEASE 4.01 ON 06/16/89 AT 13:08
+* (REV N/A)      SUPPLY VOLTAGE: +/-15V
+* CONNECTIONS:   NON-INVERTING INPUT
+*                | INVERTING INPUT
+*                | | POSITIVE POWER SUPPLY
+*                | | | NEGATIVE POWER SUPPLY
+*                | | | | OUTPUT
+*                | | | | |
+.SUBCKT TL081    1 2 3 4 5
+*
+  C1   11 12 3.498E-12
+  C2    6  7 15.00E-12
+  DC    5 53 DX
+  DE   54  5 DX
+  DLP  90 91 DX
+  DLN  92 90 DX
+  DP    4  3 DX
+  Ehalf mid 0 3 0 .5
+Eground 99 mid 4 0 .5
+  Fsum0 7 99 VB 4.715meg
+Fsum1 7 99 VC -5meg
+Fsum2 7 99 VE 5meg
+Fsum3 7 99 VLP 5meg
+Fsum4 7 99 VLN -5meg
+  GA    6  0 11 12 282.8E-6
+  GCM   0  6 10 99 8.942E-9
+  ISS   3 10 DC 195.0E-6
+  HLIM 90  0 VLIM 1K
+  J1   11  2 10 JX
+  J2   12  1 10 JX
+  R2    6  9 100.0E3
+  RD1   4 11 3.536E3
+  RD2   4 12 3.536E3
+  RO1   8  5 150
+  RO2   7 99 150
+  RP    3  4 2.143E3
+  RSS  10 99 1.026E6
+  VB    9  0 DC 0
+  VC    3 53 DC 2.200
+  VE   54  4 DC 2.200
+  VLIM  7  8 DC 0
+  VLP  91  0 DC 25
+  VLN   0 92 DC 25
+.MODEL DX D(IS=800.0E-18)
+.MODEL JX PJF(IS=15.00E-12 BETA=270.1E-6 VTO=-1)
+.ENDS
+* ALD1106PBL. Published level-1 fit, overlap in F/m; terminal parasitics below.
+.model ald_n nmos(level=1 vto=.7 kp=245u gamma=.85 phi=.9 lambda=.029
++ cbd=.5p cbs=.5p cgdo=5n cgso=5n tox=30n is=10p tnom=25)
+.subckt pass a b g
+Mchannel a g b 0 ald_n w=20u l=10u
+Rgate g 0 10T
+Cpackage g 0 .6p
+.ends pass
+
+.subckt pin an ca params: idark=70p
+.model s5971 D(is={idark+1e-18} n=1.2 cjo=11.73p vj=.7 m=.5 rs=5 tnom=25)
+Dpin an ca s5971
+.ends pin
+* -*- spice -*-
+* http://www.nxp.com/documents/spice_model/1N4148.prm
+*
+*******************************************
+*
+* 1N4148
+* 
+* NXP Semiconductors
+* 
+* High-speed diodes
+* 
+* VRRM = 100V
+* IFRM = 450 mA 
+* trr  = 4ns
+* 
+* Package pinning does not match Spice model pinning.
+* Package: SOD 27
+* 
+* Package Pin 1 : Cathode
+* Package Pin 2 : Anode
+* 
+* Simulator: PSPICE
+*
+*******************************************
+*
+.SUBCKT 1N4148 1 2 
+*
+* The resistor R1 does not reflect 
+* a physical device. Instead it
+* improves modeling in the reverse 
+* mode of operation.
+*
+R1 1 2 5.827E+9 
+D1 1 2 1N4148
+*
+.MODEL 1N4148 D 
++ IS = 4.352E-9 
++ N = 1.906 
++ BV = 110 
++ IBV = 0.0001 
++ RS = 0.6458 
++ CJO = 7.048E-13 
++ VJ = 0.869 
++ M = 0.03 
++ FC = 0.5 
++ TT = 3.48E-9 
+.ENDS
+*
+
+
+.subckt pixel pd vr rst rg sg row br bs vp vn params: ci=100p ch=1n rl=1T dark=70p
+Xphoto 0 pd pin idark={dark}
+Cint pd 0 {ci}
+Rint pd 0 10T
+Xreset vr pd rst pass
+Xbuf pd out vp vn out TL081
+Risol out drive 100
+XsampleR drive hr rg pass
+XsampleS drive hs sg pass
+Chr hr 0 {ch}
+Chs hs 0 {ch}
+Rhr hr 0 {rl}
+Rhs hs 0 {rl}
+XrowR hr br row pass
+XrowS hs bs row pass
+.ends pixel
+
+
+.subckt chain br bs nominal black vhi vp vn cds pga filtered adc
+Xbr br rb vp vn rb TL081
+Xbs bs sb vp vn sb TL081
+Xcds rb ref vhi pass
+Xbypass nominal ref 0 pass
+Xlinear pga mode vhi pass
+Xcomp compout mode 0 pass
+
+Rp ref plus 100k
+Rb plus black 100k
+Rm sb minus 100k
+Rf cds minus 100k
+Xdiff plus minus vp vn cds TL081
+Xgain cds fb vp vn pga TL081
+Xbottom bot black 0 pass
+Rground fb bot 100k
+Rgain1 pga tap1 1
+Xgain1 tap1 fb vhi pass
+Rgain2 pga tap2 100000
+Xgain2 tap2 fb 0 pass
+Rgain4 pga tap4 300000
+Xgain4 tap4 fb 0 pass
+Rgain8 pga tap8 700000
+Xgain8 tap8 fb 0 pass
+Rgain16 pga tap16 1500000
+Xgain16 tap16 fb 0 pass
+
+Rcomp pga knee 10k
+Xdiode knee black 1N4148
+Xknee knee compout vp vn compout TL081
+Rfilter mode filt 10k
+Cfilter filt 0 1.9999999999999998e-10
+Xfilter filt filtered vp vn filtered TL081
+Xdriver filtered driven vp vn driven TL081
+Riso driven adc 47
+Cadc adc 0 20p
+Radc adc 0 10meg
+.ends chain
+
+.subckt bank0 adc cds pga filtered br bs
+Vrail rail 0 5.0
+Vplus vp 0 7.5
+Vminus vn 0 -7.5
+Vlogic high 0 9
+Rvrtop rail wvr 4000.0
+Rvrbot wvr 0 6000.0
+Xvr wvr bufvr vp vn bufvr TL081
+Risovr bufvr vr 100
+
+Rnominaltop rail wnominal 4000.0
+Rnominalbot wnominal 0 6000.0
+Xnominal wnominal bufnominal vp vn bufnominal TL081
+Risonominal bufnominal nominal 100
+
+Rblacktop rail wblack 9800.0
+Rblackbot wblack 0 200.0
+Xblack wblack bufblack vp vn bufblack TL081
+Risoblack bufblack black 100
+
+Vrst srcrst 0 PWL(0 9 2e-05 9 2.002e-05 0)
+Rrst srcrst rst 33
+Vrg srcrg 0 PWL(0 0 1e-06 0 1.02e-06 9 2.5e-05 9 2.502e-05 0)
+Rrg srcrg rg 33
+Vsg srcsg 0 PWL(0 0 0.010017 0 0.01001702 9 0.010025 9 0.01002502 0)
+Rsg srcsg sg 33
+Vrow0 srcrow0 0 PWL(0 0 0.01003 0 0.01003002 9 0.0100699 9 0.01006992 0)
+Rrow0 srcrow0 row0 33
+Vrow1 srcrow1 0 PWL(0 0 0.01007 0 0.01007002 9 0.0101099 9 0.01010992 0)
+Rrow1 srcrow1 row1 33
+Vrow2 srcrow2 0 PWL(0 0 0.01011 0 0.01011002 9 0.0101499 9 0.01014992 0)
+Rrow2 srcrow2 row2 33
+Vrow3 srcrow3 0 PWL(0 0 0.01015 0 0.01015002 9 0.0101899 9 0.01018992 0)
+Rrow3 srcrow3 row3 33
+Vrow4 srcrow4 0 PWL(0 0 0.01019 0 0.01019002 9 0.0102299 9 0.01022992 0)
+Rrow4 srcrow4 row4 33
+Vrow5 srcrow5 0 PWL(0 0 0.01023 0 0.01023002 9 0.0102699 9 0.01026992 0)
+Rrow5 srcrow5 row5 33
+Vrow6 srcrow6 0 PWL(0 0 0.01027 0 0.01027002 9 0.0103099 9 0.01030992 0)
+Rrow6 srcrow6 row6 33
+Vrow7 srcrow7 0 PWL(0 0 0.01031 0 0.01031002 9 0.0103499 9 0.01034992 0)
+Rrow7 srcrow7 row7 33
+Vrow8 srcrow8 0 PWL(0 0 0.01035 0 0.01035002 9 0.0103899 9 0.01038992 0)
+Rrow8 srcrow8 row8 33
+Vrow9 srcrow9 0 PWL(0 0 0.01039 0 0.01039002 9 0.0104299 9 0.01042992 0)
+Rrow9 srcrow9 row9 33
+Vrow10 srcrow10 0 PWL(0 0 0.01043 0 0.01043002 9 0.0104699 9 0.01046992 0)
+Rrow10 srcrow10 row10 33
+Vrow11 srcrow11 0 PWL(0 0 0.01047 0 0.01047002 9 0.0105099 9 0.01050992 0)
+Rrow11 srcrow11 row11 33
+Vrow12 srcrow12 0 PWL(0 0 0.01051 0 0.01051002 9 0.0105499 9 0.01054992 0)
+Rrow12 srcrow12 row12 33
+Vrow13 srcrow13 0 PWL(0 0 0.01055 0 0.01055002 9 0.0105899 9 0.01058992 0)
+Rrow13 srcrow13 row13 33
+Vrow14 srcrow14 0 PWL(0 0 0.01059 0 0.01059002 9 0.0106299 9 0.01062992 0)
+Rrow14 srcrow14 row14 33
+Vrow15 srcrow15 0 PWL(0 0 0.01063 0 0.01063002 9 0.0106699 9 0.01066992 0)
+Rrow15 srcrow15 row15 33
+Vrow16 srcrow16 0 PWL(0 0 0.01067 0 0.01067002 9 0.0107099 9 0.01070992 0)
+Rrow16 srcrow16 row16 33
+Vrow17 srcrow17 0 PWL(0 0 0.01071 0 0.01071002 9 0.0107499 9 0.01074992 0)
+Rrow17 srcrow17 row17 33
+Vrow18 srcrow18 0 PWL(0 0 0.01075 0 0.01075002 9 0.0107899 9 0.01078992 0)
+Rrow18 srcrow18 row18 33
+Vrow19 srcrow19 0 PWL(0 0 0.01079 0 0.01079002 9 0.0108299 9 0.01082992 0)
+Rrow19 srcrow19 row19 33
+Vrow20 srcrow20 0 PWL(0 0 0.01083 0 0.01083002 9 0.0108699 9 0.01086992 0)
+Rrow20 srcrow20 row20 33
+Vrow21 srcrow21 0 PWL(0 0 0.01087 0 0.01087002 9 0.0109099 9 0.01090992 0)
+Rrow21 srcrow21 row21 33
+Vrow22 srcrow22 0 PWL(0 0 0.01091 0 0.01091002 9 0.0109499 9 0.01094992 0)
+Rrow22 srcrow22 row22 33
+Vrow23 srcrow23 0 PWL(0 0 0.01095 0 0.01095002 9 0.0109899 9 0.01098992 0)
+Rrow23 srcrow23 row23 33
+Vrow24 srcrow24 0 PWL(0 0 0.01099 0 0.01099002 9 0.0110299 9 0.01102992 0)
+Rrow24 srcrow24 row24 33
+Vrow25 srcrow25 0 PWL(0 0 0.01103 0 0.01103002 9 0.0110699 9 0.01106992 0)
+Rrow25 srcrow25 row25 33
+Vrow26 srcrow26 0 PWL(0 0 0.01107 0 0.01107002 9 0.0111099 9 0.01110992 0)
+Rrow26 srcrow26 row26 33
+Vrow27 srcrow27 0 PWL(0 0 0.01111 0 0.01111002 9 0.0111499 9 0.01114992 0)
+Rrow27 srcrow27 row27 33
+Vrow28 srcrow28 0 PWL(0 0 0.01115 0 0.01115002 9 0.0111899 9 0.01118992 0)
+Rrow28 srcrow28 row28 33
+Vrow29 srcrow29 0 PWL(0 0 0.01119 0 0.01119002 9 0.0112299 9 0.01122992 0)
+Rrow29 srcrow29 row29 33
+Vrow30 srcrow30 0 PWL(0 0 0.01123 0 0.01123002 9 0.0112699 9 0.01126992 0)
+Rrow30 srcrow30 row30 33
+Vrow31 srcrow31 0 PWL(0 0 0.01127 0 0.01127002 9 0.0113099 9 0.01130992 0)
+Rrow31 srcrow31 row31 33
+Vrow32 srcrow32 0 PWL(0 0 0.01131 0 0.01131002 9 0.0113499 9 0.01134992 0)
+Rrow32 srcrow32 row32 33
+Vrow33 srcrow33 0 PWL(0 0 0.01135 0 0.01135002 9 0.0113899 9 0.01138992 0)
+Rrow33 srcrow33 row33 33
+Vrow34 srcrow34 0 PWL(0 0 0.01139 0 0.01139002 9 0.0114299 9 0.01142992 0)
+Rrow34 srcrow34 row34 33
+Vrow35 srcrow35 0 PWL(0 0 0.01143 0 0.01143002 9 0.0114699 9 0.01146992 0)
+Rrow35 srcrow35 row35 33
+Vrow36 srcrow36 0 PWL(0 0 0.01147 0 0.01147002 9 0.0115099 9 0.01150992 0)
+Rrow36 srcrow36 row36 33
+Vrow37 srcrow37 0 PWL(0 0 0.01151 0 0.01151002 9 0.0115499 9 0.01154992 0)
+Rrow37 srcrow37 row37 33
+Vrow38 srcrow38 0 PWL(0 0 0.01155 0 0.01155002 9 0.0115899 9 0.01158992 0)
+Rrow38 srcrow38 row38 33
+Vrow39 srcrow39 0 PWL(0 0 0.01159 0 0.01159002 9 0.0116299 9 0.01162992 0)
+Rrow39 srcrow39 row39 33
+Vrow40 srcrow40 0 PWL(0 0 0.01163 0 0.01163002 9 0.0116699 9 0.01166992 0)
+Rrow40 srcrow40 row40 33
+Vrow41 srcrow41 0 PWL(0 0 0.01167 0 0.01167002 9 0.0117099 9 0.01170992 0)
+Rrow41 srcrow41 row41 33
+Vrow42 srcrow42 0 PWL(0 0 0.01171 0 0.01171002 9 0.0117499 9 0.01174992 0)
+Rrow42 srcrow42 row42 33
+Vrow43 srcrow43 0 PWL(0 0 0.01175 0 0.01175002 9 0.0117899 9 0.01178992 0)
+Rrow43 srcrow43 row43 33
+Vrow44 srcrow44 0 PWL(0 0 0.01179 0 0.01179002 9 0.0118299 9 0.01182992 0)
+Rrow44 srcrow44 row44 33
+Vrow45 srcrow45 0 PWL(0 0 0.01183 0 0.01183002 9 0.0118699 9 0.01186992 0)
+Rrow45 srcrow45 row45 33
+Vrow46 srcrow46 0 PWL(0 0 0.01187 0 0.01187002 9 0.0119099 9 0.01190992 0)
+Rrow46 srcrow46 row46 33
+Vrow47 srcrow47 0 PWL(0 0 0.01191 0 0.01191002 9 0.0119499 9 0.01194992 0)
+Rrow47 srcrow47 row47 33
+Vrow48 srcrow48 0 PWL(0 0 0.01195 0 0.01195002 9 0.0119899 9 0.01198992 0)
+Rrow48 srcrow48 row48 33
+Vrow49 srcrow49 0 PWL(0 0 0.01199 0 0.01199002 9 0.0120299 9 0.01202992 0)
+Rrow49 srcrow49 row49 33
+Vrow50 srcrow50 0 PWL(0 0 0.01203 0 0.01203002 9 0.0120699 9 0.01206992 0)
+Rrow50 srcrow50 row50 33
+Vrow51 srcrow51 0 PWL(0 0 0.01207 0 0.01207002 9 0.0121099 9 0.01210992 0)
+Rrow51 srcrow51 row51 33
+Vrow52 srcrow52 0 PWL(0 0 0.01211 0 0.01211002 9 0.0121499 9 0.01214992 0)
+Rrow52 srcrow52 row52 33
+Vrow53 srcrow53 0 PWL(0 0 0.01215 0 0.01215002 9 0.0121899 9 0.01218992 0)
+Rrow53 srcrow53 row53 33
+Vrow54 srcrow54 0 PWL(0 0 0.01219 0 0.01219002 9 0.0122299 9 0.01222992 0)
+Rrow54 srcrow54 row54 33
+Vrow55 srcrow55 0 PWL(0 0 0.01223 0 0.01223002 9 0.0122699 9 0.01226992 0)
+Rrow55 srcrow55 row55 33
+Vrow56 srcrow56 0 PWL(0 0 0.01227 0 0.01227002 9 0.0123099 9 0.01230992 0)
+Rrow56 srcrow56 row56 33
+Vrow57 srcrow57 0 PWL(0 0 0.01231 0 0.01231002 9 0.0123499 9 0.01234992 0)
+Rrow57 srcrow57 row57 33
+Vrow58 srcrow58 0 PWL(0 0 0.01235 0 0.01235002 9 0.0123899 9 0.01238992 0)
+Rrow58 srcrow58 row58 33
+Vrow59 srcrow59 0 PWL(0 0 0.01239 0 0.01239002 9 0.0124299 9 0.01242992 0)
+Rrow59 srcrow59 row59 33
+Vrow60 srcrow60 0 PWL(0 0 0.01243 0 0.01243002 9 0.0124699 9 0.01246992 0)
+Rrow60 srcrow60 row60 33
+Vrow61 srcrow61 0 PWL(0 0 0.01247 0 0.01247002 9 0.0125099 9 0.01250992 0)
+Rrow61 srcrow61 row61 33
+Vrow62 srcrow62 0 PWL(0 0 0.01251 0 0.01251002 9 0.0125499 9 0.01254992 0)
+Rrow62 srcrow62 row62 33
+Vrow63 srcrow63 0 PWL(0 0 0.01255 0 0.01255002 9 0.0125899 9 0.01258992 0)
+Rrow63 srcrow63 row63 33
+Vrow64 srcrow64 0 PWL(0 0 0.01259 0 0.01259002 9 0.0126299 9 0.01262992 0)
+Rrow64 srcrow64 row64 33
+Vrow65 srcrow65 0 PWL(0 0 0.01263 0 0.01263002 9 0.0126699 9 0.01266992 0)
+Rrow65 srcrow65 row65 33
+Vrow66 srcrow66 0 PWL(0 0 0.01267 0 0.01267002 9 0.0127099 9 0.01270992 0)
+Rrow66 srcrow66 row66 33
+Vrow67 srcrow67 0 PWL(0 0 0.01271 0 0.01271002 9 0.0127499 9 0.01274992 0)
+Rrow67 srcrow67 row67 33
+Vrow68 srcrow68 0 PWL(0 0 0.01275 0 0.01275002 9 0.0127899 9 0.01278992 0)
+Rrow68 srcrow68 row68 33
+Vrow69 srcrow69 0 PWL(0 0 0.01279 0 0.01279002 9 0.0128299 9 0.01282992 0)
+Rrow69 srcrow69 row69 33
+Vrow70 srcrow70 0 PWL(0 0 0.01283 0 0.01283002 9 0.0128699 9 0.01286992 0)
+Rrow70 srcrow70 row70 33
+Vrow71 srcrow71 0 PWL(0 0 0.01287 0 0.01287002 9 0.0129099 9 0.01290992 0)
+Rrow71 srcrow71 row71 33
+Vrow72 srcrow72 0 PWL(0 0 0.01291 0 0.01291002 9 0.0129499 9 0.01294992 0)
+Rrow72 srcrow72 row72 33
+Vrow73 srcrow73 0 PWL(0 0 0.01295 0 0.01295002 9 0.0129899 9 0.01298992 0)
+Rrow73 srcrow73 row73 33
+Vrow74 srcrow74 0 PWL(0 0 0.01299 0 0.01299002 9 0.0130299 9 0.01302992 0)
+Rrow74 srcrow74 row74 33
+Vrow75 srcrow75 0 PWL(0 0 0.01303 0 0.01303002 9 0.0130699 9 0.01306992 0)
+Rrow75 srcrow75 row75 33
+Vrow76 srcrow76 0 PWL(0 0 0.01307 0 0.01307002 9 0.0131099 9 0.01310992 0)
+Rrow76 srcrow76 row76 33
+Vrow77 srcrow77 0 PWL(0 0 0.01311 0 0.01311002 9 0.0131499 9 0.01314992 0)
+Rrow77 srcrow77 row77 33
+Vrow78 srcrow78 0 PWL(0 0 0.01315 0 0.01315002 9 0.0131899 9 0.01318992 0)
+Rrow78 srcrow78 row78 33
+Vrow79 srcrow79 0 PWL(0 0 0.01319 0 0.01319002 9 0.0132299 9 0.01322992 0)
+Rrow79 srcrow79 row79 33
+Vrow80 srcrow80 0 PWL(0 0 0.01323 0 0.01323002 9 0.0132699 9 0.01326992 0)
+Rrow80 srcrow80 row80 33
+Vrow81 srcrow81 0 PWL(0 0 0.01327 0 0.01327002 9 0.0133099 9 0.01330992 0)
+Rrow81 srcrow81 row81 33
+Vrow82 srcrow82 0 PWL(0 0 0.01331 0 0.01331002 9 0.0133499 9 0.01334992 0)
+Rrow82 srcrow82 row82 33
+Vrow83 srcrow83 0 PWL(0 0 0.01335 0 0.01335002 9 0.0133899 9 0.01338992 0)
+Rrow83 srcrow83 row83 33
+Vrow84 srcrow84 0 PWL(0 0 0.01339 0 0.01339002 9 0.0134299 9 0.01342992 0)
+Rrow84 srcrow84 row84 33
+Vrow85 srcrow85 0 PWL(0 0 0.01343 0 0.01343002 9 0.0134699 9 0.01346992 0)
+Rrow85 srcrow85 row85 33
+Vrow86 srcrow86 0 PWL(0 0 0.01347 0 0.01347002 9 0.0135099 9 0.01350992 0)
+Rrow86 srcrow86 row86 33
+Vrow87 srcrow87 0 PWL(0 0 0.01351 0 0.01351002 9 0.0135499 9 0.01354992 0)
+Rrow87 srcrow87 row87 33
+Vrow88 srcrow88 0 PWL(0 0 0.01355 0 0.01355002 9 0.0135899 9 0.01358992 0)
+Rrow88 srcrow88 row88 33
+Vrow89 srcrow89 0 PWL(0 0 0.01359 0 0.01359002 9 0.0136299 9 0.01362992 0)
+Rrow89 srcrow89 row89 33
+Vrow90 srcrow90 0 PWL(0 0 0.01363 0 0.01363002 9 0.0136699 9 0.01366992 0)
+Rrow90 srcrow90 row90 33
+Vrow91 srcrow91 0 PWL(0 0 0.01367 0 0.01367002 9 0.0137099 9 0.01370992 0)
+Rrow91 srcrow91 row91 33
+Vrow92 srcrow92 0 PWL(0 0 0.01371 0 0.01371002 9 0.0137499 9 0.01374992 0)
+Rrow92 srcrow92 row92 33
+Vrow93 srcrow93 0 PWL(0 0 0.01375 0 0.01375002 9 0.0137899 9 0.01378992 0)
+Rrow93 srcrow93 row93 33
+Vrow94 srcrow94 0 PWL(0 0 0.01379 0 0.01379002 9 0.0138299 9 0.01382992 0)
+Rrow94 srcrow94 row94 33
+Vrow95 srcrow95 0 PWL(0 0 0.01383 0 0.01383002 9 0.0138699 9 0.01386992 0)
+Rrow95 srcrow95 row95 33
+Vrow96 srcrow96 0 PWL(0 0 0.01387 0 0.01387002 9 0.0139099 9 0.01390992 0)
+Rrow96 srcrow96 row96 33
+Vrow97 srcrow97 0 PWL(0 0 0.01391 0 0.01391002 9 0.0139499 9 0.01394992 0)
+Rrow97 srcrow97 row97 33
+Vrow98 srcrow98 0 PWL(0 0 0.01395 0 0.01395002 9 0.0139899 9 0.01398992 0)
+Rrow98 srcrow98 row98 33
+Vrow99 srcrow99 0 PWL(0 0 0.01399 0 0.01399002 9 0.0140299 9 0.01402992 0)
+Rrow99 srcrow99 row99 33
+Vrow100 srcrow100 0 PWL(0 0 0.01403 0 0.01403002 9 0.0140699 9 0.01406992 0)
+Rrow100 srcrow100 row100 33
+Vrow101 srcrow101 0 PWL(0 0 0.01407 0 0.01407002 9 0.0141099 9 0.01410992 0)
+Rrow101 srcrow101 row101 33
+Vrow102 srcrow102 0 PWL(0 0 0.01411 0 0.01411002 9 0.0141499 9 0.01414992 0)
+Rrow102 srcrow102 row102 33
+Vrow103 srcrow103 0 PWL(0 0 0.01415 0 0.01415002 9 0.0141899 9 0.01418992 0)
+Rrow103 srcrow103 row103 33
+Vrow104 srcrow104 0 PWL(0 0 0.01419 0 0.01419002 9 0.0142299 9 0.01422992 0)
+Rrow104 srcrow104 row104 33
+Vrow105 srcrow105 0 PWL(0 0 0.01423 0 0.01423002 9 0.0142699 9 0.01426992 0)
+Rrow105 srcrow105 row105 33
+Vrow106 srcrow106 0 PWL(0 0 0.01427 0 0.01427002 9 0.0143099 9 0.01430992 0)
+Rrow106 srcrow106 row106 33
+Vrow107 srcrow107 0 PWL(0 0 0.01431 0 0.01431002 9 0.0143499 9 0.01434992 0)
+Rrow107 srcrow107 row107 33
+Vrow108 srcrow108 0 PWL(0 0 0.01435 0 0.01435002 9 0.0143899 9 0.01438992 0)
+Rrow108 srcrow108 row108 33
+Vrow109 srcrow109 0 PWL(0 0 0.01439 0 0.01439002 9 0.0144299 9 0.01442992 0)
+Rrow109 srcrow109 row109 33
+Vrow110 srcrow110 0 PWL(0 0 0.01443 0 0.01443002 9 0.0144699 9 0.01446992 0)
+Rrow110 srcrow110 row110 33
+Vrow111 srcrow111 0 PWL(0 0 0.01447 0 0.01447002 9 0.0145099 9 0.01450992 0)
+Rrow111 srcrow111 row111 33
+Vrow112 srcrow112 0 PWL(0 0 0.01451 0 0.01451002 9 0.0145499 9 0.01454992 0)
+Rrow112 srcrow112 row112 33
+Vrow113 srcrow113 0 PWL(0 0 0.01455 0 0.01455002 9 0.0145899 9 0.01458992 0)
+Rrow113 srcrow113 row113 33
+Vrow114 srcrow114 0 PWL(0 0 0.01459 0 0.01459002 9 0.0146299 9 0.01462992 0)
+Rrow114 srcrow114 row114 33
+Vrow115 srcrow115 0 PWL(0 0 0.01463 0 0.01463002 9 0.0146699 9 0.01466992 0)
+Rrow115 srcrow115 row115 33
+Vrow116 srcrow116 0 PWL(0 0 0.01467 0 0.01467002 9 0.0147099 9 0.01470992 0)
+Rrow116 srcrow116 row116 33
+Vrow117 srcrow117 0 PWL(0 0 0.01471 0 0.01471002 9 0.0147499 9 0.01474992 0)
+Rrow117 srcrow117 row117 33
+Vrow118 srcrow118 0 PWL(0 0 0.01475 0 0.01475002 9 0.0147899 9 0.01478992 0)
+Rrow118 srcrow118 row118 33
+Vrow119 srcrow119 0 PWL(0 0 0.01479 0 0.01479002 9 0.0148299 9 0.01482992 0)
+Rrow119 srcrow119 row119 33
+Vrow120 srcrow120 0 PWL(0 0 0.01483 0 0.01483002 9 0.0148699 9 0.01486992 0)
+Rrow120 srcrow120 row120 33
+Vrow121 srcrow121 0 PWL(0 0 0.01487 0 0.01487002 9 0.0149099 9 0.01490992 0)
+Rrow121 srcrow121 row121 33
+Vrow122 srcrow122 0 PWL(0 0 0.01491 0 0.01491002 9 0.0149499 9 0.01494992 0)
+Rrow122 srcrow122 row122 33
+Vrow123 srcrow123 0 PWL(0 0 0.01495 0 0.01495002 9 0.0149899 9 0.01498992 0)
+Rrow123 srcrow123 row123 33
+Vrow124 srcrow124 0 PWL(0 0 0.01499 0 0.01499002 9 0.0150299 9 0.01502992 0)
+Rrow124 srcrow124 row124 33
+Vrow125 srcrow125 0 PWL(0 0 0.01503 0 0.01503002 9 0.0150699 9 0.01506992 0)
+Rrow125 srcrow125 row125 33
+Vrow126 srcrow126 0 PWL(0 0 0.01507 0 0.01507002 9 0.0151099 9 0.01510992 0)
+Rrow126 srcrow126 row126 33
+Vrow127 srcrow127 0 PWL(0 0 0.01511 0 0.01511002 9 0.0151499 9 0.01514992 0)
+Rrow127 srcrow127 row127 33
+Vcol0 srccol0 0 PWL(0 0 0.01003 0 0.01003002 9 0.0100699 9 0.01006992 0 0.01007 0 0.01007002 9 0.0101099 9 0.01010992 0 0.01011 0 0.01011002 9 0.0101499 9 0.01014992 0 0.01015 0 0.01015002 9 0.0101899 9 0.01018992 0 0.01019 0 0.01019002 9 0.0102299 9 0.01022992 0 0.01023 0 0.01023002 9 0.0102699 9 0.01026992 0 0.01027 0 0.01027002 9 0.0103099 9 0.01030992 0 0.01031 0 0.01031002 9 0.0103499 9 0.01034992 0 0.01035 0 0.01035002 9 0.0103899 9 0.01038992 0 0.01039 0 0.01039002 9 0.0104299 9 0.01042992 0 0.01043 0 0.01043002 9 0.0104699 9 0.01046992 0 0.01047 0 0.01047002 9 0.0105099 9 0.01050992 0 0.01051 0 0.01051002 9 0.0105499 9 0.01054992 0 0.01055 0 0.01055002 9 0.0105899 9 0.01058992 0 0.01059 0 0.01059002 9 0.0106299 9 0.01062992 0 0.01063 0 0.01063002 9 0.0106699 9 0.01066992 0 0.01067 0 0.01067002 9 0.0107099 9 0.01070992 0 0.01071 0 0.01071002 9 0.0107499 9 0.01074992 0 0.01075 0 0.01075002 9 0.0107899 9 0.01078992 0 0.01079 0 0.01079002 9 0.0108299 9 0.01082992 0 0.01083 0 0.01083002 9 0.0108699 9 0.01086992 0 0.01087 0 0.01087002 9 0.0109099 9 0.01090992 0 0.01091 0 0.01091002 9 0.0109499 9 0.01094992 0 0.01095 0 0.01095002 9 0.0109899 9 0.01098992 0 0.01099 0 0.01099002 9 0.0110299 9 0.01102992 0 0.01103 0 0.01103002 9 0.0110699 9 0.01106992 0 0.01107 0 0.01107002 9 0.0111099 9 0.01110992 0 0.01111 0 0.01111002 9 0.0111499 9 0.01114992 0 0.01115 0 0.01115002 9 0.0111899 9 0.01118992 0 0.01119 0 0.01119002 9 0.0112299 9 0.01122992 0 0.01123 0 0.01123002 9 0.0112699 9 0.01126992 0 0.01127 0 0.01127002 9 0.0113099 9 0.01130992 0 0.01131 0 0.01131002 9 0.0113499 9 0.01134992 0 0.01135 0 0.01135002 9 0.0113899 9 0.01138992 0 0.01139 0 0.01139002 9 0.0114299 9 0.01142992 0 0.01143 0 0.01143002 9 0.0114699 9 0.01146992 0 0.01147 0 0.01147002 9 0.0115099 9 0.01150992 0 0.01151 0 0.01151002 9 0.0115499 9 0.01154992 0 0.01155 0 0.01155002 9 0.0115899 9 0.01158992 0 0.01159 0 0.01159002 9 0.0116299 9 0.01162992 0 0.01163 0 0.01163002 9 0.0116699 9 0.01166992 0 0.01167 0 0.01167002 9 0.0117099 9 0.01170992 0 0.01171 0 0.01171002 9 0.0117499 9 0.01174992 0 0.01175 0 0.01175002 9 0.0117899 9 0.01178992 0 0.01179 0 0.01179002 9 0.0118299 9 0.01182992 0 0.01183 0 0.01183002 9 0.0118699 9 0.01186992 0 0.01187 0 0.01187002 9 0.0119099 9 0.01190992 0 0.01191 0 0.01191002 9 0.0119499 9 0.01194992 0 0.01195 0 0.01195002 9 0.0119899 9 0.01198992 0 0.01199 0 0.01199002 9 0.0120299 9 0.01202992 0 0.01203 0 0.01203002 9 0.0120699 9 0.01206992 0 0.01207 0 0.01207002 9 0.0121099 9 0.01210992 0 0.01211 0 0.01211002 9 0.0121499 9 0.01214992 0 0.01215 0 0.01215002 9 0.0121899 9 0.01218992 0 0.01219 0 0.01219002 9 0.0122299 9 0.01222992 0 0.01223 0 0.01223002 9 0.0122699 9 0.01226992 0 0.01227 0 0.01227002 9 0.0123099 9 0.01230992 0 0.01231 0 0.01231002 9 0.0123499 9 0.01234992 0 0.01235 0 0.01235002 9 0.0123899 9 0.01238992 0 0.01239 0 0.01239002 9 0.0124299 9 0.01242992 0 0.01243 0 0.01243002 9 0.0124699 9 0.01246992 0 0.01247 0 0.01247002 9 0.0125099 9 0.01250992 0 0.01251 0 0.01251002 9 0.0125499 9 0.01254992 0 0.01255 0 0.01255002 9 0.0125899 9 0.01258992 0 0.01259 0 0.01259002 9 0.0126299 9 0.01262992 0 0.01263 0 0.01263002 9 0.0126699 9 0.01266992 0 0.01267 0 0.01267002 9 0.0127099 9 0.01270992 0 0.01271 0 0.01271002 9 0.0127499 9 0.01274992 0 0.01275 0 0.01275002 9 0.0127899 9 0.01278992 0 0.01279 0 0.01279002 9 0.0128299 9 0.01282992 0 0.01283 0 0.01283002 9 0.0128699 9 0.01286992 0 0.01287 0 0.01287002 9 0.0129099 9 0.01290992 0 0.01291 0 0.01291002 9 0.0129499 9 0.01294992 0 0.01295 0 0.01295002 9 0.0129899 9 0.01298992 0 0.01299 0 0.01299002 9 0.0130299 9 0.01302992 0 0.01303 0 0.01303002 9 0.0130699 9 0.01306992 0 0.01307 0 0.01307002 9 0.0131099 9 0.01310992 0 0.01311 0 0.01311002 9 0.0131499 9 0.01314992 0 0.01315 0 0.01315002 9 0.0131899 9 0.01318992 0 0.01319 0 0.01319002 9 0.0132299 9 0.01322992 0 0.01323 0 0.01323002 9 0.0132699 9 0.01326992 0 0.01327 0 0.01327002 9 0.0133099 9 0.01330992 0 0.01331 0 0.01331002 9 0.0133499 9 0.01334992 0 0.01335 0 0.01335002 9 0.0133899 9 0.01338992 0 0.01339 0 0.01339002 9 0.0134299 9 0.01342992 0 0.01343 0 0.01343002 9 0.0134699 9 0.01346992 0 0.01347 0 0.01347002 9 0.0135099 9 0.01350992 0 0.01351 0 0.01351002 9 0.0135499 9 0.01354992 0 0.01355 0 0.01355002 9 0.0135899 9 0.01358992 0 0.01359 0 0.01359002 9 0.0136299 9 0.01362992 0 0.01363 0 0.01363002 9 0.0136699 9 0.01366992 0 0.01367 0 0.01367002 9 0.0137099 9 0.01370992 0 0.01371 0 0.01371002 9 0.0137499 9 0.01374992 0 0.01375 0 0.01375002 9 0.0137899 9 0.01378992 0 0.01379 0 0.01379002 9 0.0138299 9 0.01382992 0 0.01383 0 0.01383002 9 0.0138699 9 0.01386992 0 0.01387 0 0.01387002 9 0.0139099 9 0.01390992 0 0.01391 0 0.01391002 9 0.0139499 9 0.01394992 0 0.01395 0 0.01395002 9 0.0139899 9 0.01398992 0 0.01399 0 0.01399002 9 0.0140299 9 0.01402992 0 0.01403 0 0.01403002 9 0.0140699 9 0.01406992 0 0.01407 0 0.01407002 9 0.0141099 9 0.01410992 0 0.01411 0 0.01411002 9 0.0141499 9 0.01414992 0 0.01415 0 0.01415002 9 0.0141899 9 0.01418992 0 0.01419 0 0.01419002 9 0.0142299 9 0.01422992 0 0.01423 0 0.01423002 9 0.0142699 9 0.01426992 0 0.01427 0 0.01427002 9 0.0143099 9 0.01430992 0 0.01431 0 0.01431002 9 0.0143499 9 0.01434992 0 0.01435 0 0.01435002 9 0.0143899 9 0.01438992 0 0.01439 0 0.01439002 9 0.0144299 9 0.01442992 0 0.01443 0 0.01443002 9 0.0144699 9 0.01446992 0 0.01447 0 0.01447002 9 0.0145099 9 0.01450992 0 0.01451 0 0.01451002 9 0.0145499 9 0.01454992 0 0.01455 0 0.01455002 9 0.0145899 9 0.01458992 0 0.01459 0 0.01459002 9 0.0146299 9 0.01462992 0 0.01463 0 0.01463002 9 0.0146699 9 0.01466992 0 0.01467 0 0.01467002 9 0.0147099 9 0.01470992 0 0.01471 0 0.01471002 9 0.0147499 9 0.01474992 0 0.01475 0 0.01475002 9 0.0147899 9 0.01478992 0 0.01479 0 0.01479002 9 0.0148299 9 0.01482992 0 0.01483 0 0.01483002 9 0.0148699 9 0.01486992 0 0.01487 0 0.01487002 9 0.0149099 9 0.01490992 0 0.01491 0 0.01491002 9 0.0149499 9 0.01494992 0 0.01495 0 0.01495002 9 0.0149899 9 0.01498992 0 0.01499 0 0.01499002 9 0.0150299 9 0.01502992 0 0.01503 0 0.01503002 9 0.0150699 9 0.01506992 0 0.01507 0 0.01507002 9 0.0151099 9 0.01510992 0 0.01511 0 0.01511002 9 0.0151499 9 0.01514992 0)
+Rcol0 srccol0 col0 33
+Xmuxbr0 br0_0 br col0 pass
+Xmuxbs0 bs0_0 bs col0 pass
+Iphoto0 pd0 0 1.98e-08
+X0 pd0 vr rst rg sg row0 br0_0 bs0_0 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_0 br0_0 0 1p
+Cbs0_0 bs0_0 0 1p
+Iphoto1 pd1 0 0.0
+X1 pd1 vr rst rg sg row1 br0_1 bs0_1 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_1 br0_1 0 1p
+Rbr0_1 br0_1 br0_0 .1
+Cbs0_1 bs0_1 0 1p
+Rbs0_1 bs0_1 bs0_0 .1
+Iphoto2 pd2 0 1.98e-08
+X2 pd2 vr rst rg sg row2 br0_2 bs0_2 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_2 br0_2 0 1p
+Rbr0_2 br0_2 br0_1 .1
+Cbs0_2 bs0_2 0 1p
+Rbs0_2 bs0_2 bs0_1 .1
+Iphoto3 pd3 0 0.0
+X3 pd3 vr rst rg sg row3 br0_3 bs0_3 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_3 br0_3 0 1p
+Rbr0_3 br0_3 br0_2 .1
+Cbs0_3 bs0_3 0 1p
+Rbs0_3 bs0_3 bs0_2 .1
+Iphoto4 pd4 0 1.98e-08
+X4 pd4 vr rst rg sg row4 br0_4 bs0_4 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_4 br0_4 0 1p
+Rbr0_4 br0_4 br0_3 .1
+Cbs0_4 bs0_4 0 1p
+Rbs0_4 bs0_4 bs0_3 .1
+Iphoto5 pd5 0 0.0
+X5 pd5 vr rst rg sg row5 br0_5 bs0_5 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_5 br0_5 0 1p
+Rbr0_5 br0_5 br0_4 .1
+Cbs0_5 bs0_5 0 1p
+Rbs0_5 bs0_5 bs0_4 .1
+Iphoto6 pd6 0 1.98e-08
+X6 pd6 vr rst rg sg row6 br0_6 bs0_6 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_6 br0_6 0 1p
+Rbr0_6 br0_6 br0_5 .1
+Cbs0_6 bs0_6 0 1p
+Rbs0_6 bs0_6 bs0_5 .1
+Iphoto7 pd7 0 0.0
+X7 pd7 vr rst rg sg row7 br0_7 bs0_7 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_7 br0_7 0 1p
+Rbr0_7 br0_7 br0_6 .1
+Cbs0_7 bs0_7 0 1p
+Rbs0_7 bs0_7 bs0_6 .1
+Iphoto8 pd8 0 1.98e-08
+X8 pd8 vr rst rg sg row8 br0_8 bs0_8 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_8 br0_8 0 1p
+Rbr0_8 br0_8 br0_7 .1
+Cbs0_8 bs0_8 0 1p
+Rbs0_8 bs0_8 bs0_7 .1
+Iphoto9 pd9 0 0.0
+X9 pd9 vr rst rg sg row9 br0_9 bs0_9 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_9 br0_9 0 1p
+Rbr0_9 br0_9 br0_8 .1
+Cbs0_9 bs0_9 0 1p
+Rbs0_9 bs0_9 bs0_8 .1
+Iphoto10 pd10 0 1.98e-08
+X10 pd10 vr rst rg sg row10 br0_10 bs0_10 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_10 br0_10 0 1p
+Rbr0_10 br0_10 br0_9 .1
+Cbs0_10 bs0_10 0 1p
+Rbs0_10 bs0_10 bs0_9 .1
+Iphoto11 pd11 0 0.0
+X11 pd11 vr rst rg sg row11 br0_11 bs0_11 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_11 br0_11 0 1p
+Rbr0_11 br0_11 br0_10 .1
+Cbs0_11 bs0_11 0 1p
+Rbs0_11 bs0_11 bs0_10 .1
+Iphoto12 pd12 0 1.98e-08
+X12 pd12 vr rst rg sg row12 br0_12 bs0_12 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_12 br0_12 0 1p
+Rbr0_12 br0_12 br0_11 .1
+Cbs0_12 bs0_12 0 1p
+Rbs0_12 bs0_12 bs0_11 .1
+Iphoto13 pd13 0 0.0
+X13 pd13 vr rst rg sg row13 br0_13 bs0_13 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_13 br0_13 0 1p
+Rbr0_13 br0_13 br0_12 .1
+Cbs0_13 bs0_13 0 1p
+Rbs0_13 bs0_13 bs0_12 .1
+Iphoto14 pd14 0 1.98e-08
+X14 pd14 vr rst rg sg row14 br0_14 bs0_14 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_14 br0_14 0 1p
+Rbr0_14 br0_14 br0_13 .1
+Cbs0_14 bs0_14 0 1p
+Rbs0_14 bs0_14 bs0_13 .1
+Iphoto15 pd15 0 0.0
+X15 pd15 vr rst rg sg row15 br0_15 bs0_15 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_15 br0_15 0 1p
+Rbr0_15 br0_15 br0_14 .1
+Cbs0_15 bs0_15 0 1p
+Rbs0_15 bs0_15 bs0_14 .1
+Iphoto16 pd16 0 1.98e-08
+X16 pd16 vr rst rg sg row16 br0_16 bs0_16 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_16 br0_16 0 1p
+Rbr0_16 br0_16 br0_15 .1
+Cbs0_16 bs0_16 0 1p
+Rbs0_16 bs0_16 bs0_15 .1
+Iphoto17 pd17 0 0.0
+X17 pd17 vr rst rg sg row17 br0_17 bs0_17 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_17 br0_17 0 1p
+Rbr0_17 br0_17 br0_16 .1
+Cbs0_17 bs0_17 0 1p
+Rbs0_17 bs0_17 bs0_16 .1
+Iphoto18 pd18 0 1.98e-08
+X18 pd18 vr rst rg sg row18 br0_18 bs0_18 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_18 br0_18 0 1p
+Rbr0_18 br0_18 br0_17 .1
+Cbs0_18 bs0_18 0 1p
+Rbs0_18 bs0_18 bs0_17 .1
+Iphoto19 pd19 0 0.0
+X19 pd19 vr rst rg sg row19 br0_19 bs0_19 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_19 br0_19 0 1p
+Rbr0_19 br0_19 br0_18 .1
+Cbs0_19 bs0_19 0 1p
+Rbs0_19 bs0_19 bs0_18 .1
+Iphoto20 pd20 0 1.98e-08
+X20 pd20 vr rst rg sg row20 br0_20 bs0_20 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_20 br0_20 0 1p
+Rbr0_20 br0_20 br0_19 .1
+Cbs0_20 bs0_20 0 1p
+Rbs0_20 bs0_20 bs0_19 .1
+Iphoto21 pd21 0 0.0
+X21 pd21 vr rst rg sg row21 br0_21 bs0_21 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_21 br0_21 0 1p
+Rbr0_21 br0_21 br0_20 .1
+Cbs0_21 bs0_21 0 1p
+Rbs0_21 bs0_21 bs0_20 .1
+Iphoto22 pd22 0 1.98e-08
+X22 pd22 vr rst rg sg row22 br0_22 bs0_22 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_22 br0_22 0 1p
+Rbr0_22 br0_22 br0_21 .1
+Cbs0_22 bs0_22 0 1p
+Rbs0_22 bs0_22 bs0_21 .1
+Iphoto23 pd23 0 0.0
+X23 pd23 vr rst rg sg row23 br0_23 bs0_23 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_23 br0_23 0 1p
+Rbr0_23 br0_23 br0_22 .1
+Cbs0_23 bs0_23 0 1p
+Rbs0_23 bs0_23 bs0_22 .1
+Iphoto24 pd24 0 1.98e-08
+X24 pd24 vr rst rg sg row24 br0_24 bs0_24 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_24 br0_24 0 1p
+Rbr0_24 br0_24 br0_23 .1
+Cbs0_24 bs0_24 0 1p
+Rbs0_24 bs0_24 bs0_23 .1
+Iphoto25 pd25 0 0.0
+X25 pd25 vr rst rg sg row25 br0_25 bs0_25 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_25 br0_25 0 1p
+Rbr0_25 br0_25 br0_24 .1
+Cbs0_25 bs0_25 0 1p
+Rbs0_25 bs0_25 bs0_24 .1
+Iphoto26 pd26 0 1.98e-08
+X26 pd26 vr rst rg sg row26 br0_26 bs0_26 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_26 br0_26 0 1p
+Rbr0_26 br0_26 br0_25 .1
+Cbs0_26 bs0_26 0 1p
+Rbs0_26 bs0_26 bs0_25 .1
+Iphoto27 pd27 0 0.0
+X27 pd27 vr rst rg sg row27 br0_27 bs0_27 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_27 br0_27 0 1p
+Rbr0_27 br0_27 br0_26 .1
+Cbs0_27 bs0_27 0 1p
+Rbs0_27 bs0_27 bs0_26 .1
+Iphoto28 pd28 0 1.98e-08
+X28 pd28 vr rst rg sg row28 br0_28 bs0_28 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_28 br0_28 0 1p
+Rbr0_28 br0_28 br0_27 .1
+Cbs0_28 bs0_28 0 1p
+Rbs0_28 bs0_28 bs0_27 .1
+Iphoto29 pd29 0 0.0
+X29 pd29 vr rst rg sg row29 br0_29 bs0_29 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_29 br0_29 0 1p
+Rbr0_29 br0_29 br0_28 .1
+Cbs0_29 bs0_29 0 1p
+Rbs0_29 bs0_29 bs0_28 .1
+Iphoto30 pd30 0 1.98e-08
+X30 pd30 vr rst rg sg row30 br0_30 bs0_30 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_30 br0_30 0 1p
+Rbr0_30 br0_30 br0_29 .1
+Cbs0_30 bs0_30 0 1p
+Rbs0_30 bs0_30 bs0_29 .1
+Iphoto31 pd31 0 0.0
+X31 pd31 vr rst rg sg row31 br0_31 bs0_31 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_31 br0_31 0 1p
+Rbr0_31 br0_31 br0_30 .1
+Cbs0_31 bs0_31 0 1p
+Rbs0_31 bs0_31 bs0_30 .1
+Iphoto32 pd32 0 1.98e-08
+X32 pd32 vr rst rg sg row32 br0_32 bs0_32 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_32 br0_32 0 1p
+Rbr0_32 br0_32 br0_31 .1
+Cbs0_32 bs0_32 0 1p
+Rbs0_32 bs0_32 bs0_31 .1
+Iphoto33 pd33 0 0.0
+X33 pd33 vr rst rg sg row33 br0_33 bs0_33 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_33 br0_33 0 1p
+Rbr0_33 br0_33 br0_32 .1
+Cbs0_33 bs0_33 0 1p
+Rbs0_33 bs0_33 bs0_32 .1
+Iphoto34 pd34 0 1.98e-08
+X34 pd34 vr rst rg sg row34 br0_34 bs0_34 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_34 br0_34 0 1p
+Rbr0_34 br0_34 br0_33 .1
+Cbs0_34 bs0_34 0 1p
+Rbs0_34 bs0_34 bs0_33 .1
+Iphoto35 pd35 0 0.0
+X35 pd35 vr rst rg sg row35 br0_35 bs0_35 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_35 br0_35 0 1p
+Rbr0_35 br0_35 br0_34 .1
+Cbs0_35 bs0_35 0 1p
+Rbs0_35 bs0_35 bs0_34 .1
+Iphoto36 pd36 0 1.98e-08
+X36 pd36 vr rst rg sg row36 br0_36 bs0_36 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_36 br0_36 0 1p
+Rbr0_36 br0_36 br0_35 .1
+Cbs0_36 bs0_36 0 1p
+Rbs0_36 bs0_36 bs0_35 .1
+Iphoto37 pd37 0 0.0
+X37 pd37 vr rst rg sg row37 br0_37 bs0_37 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_37 br0_37 0 1p
+Rbr0_37 br0_37 br0_36 .1
+Cbs0_37 bs0_37 0 1p
+Rbs0_37 bs0_37 bs0_36 .1
+Iphoto38 pd38 0 1.98e-08
+X38 pd38 vr rst rg sg row38 br0_38 bs0_38 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_38 br0_38 0 1p
+Rbr0_38 br0_38 br0_37 .1
+Cbs0_38 bs0_38 0 1p
+Rbs0_38 bs0_38 bs0_37 .1
+Iphoto39 pd39 0 0.0
+X39 pd39 vr rst rg sg row39 br0_39 bs0_39 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_39 br0_39 0 1p
+Rbr0_39 br0_39 br0_38 .1
+Cbs0_39 bs0_39 0 1p
+Rbs0_39 bs0_39 bs0_38 .1
+Iphoto40 pd40 0 1.98e-08
+X40 pd40 vr rst rg sg row40 br0_40 bs0_40 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_40 br0_40 0 1p
+Rbr0_40 br0_40 br0_39 .1
+Cbs0_40 bs0_40 0 1p
+Rbs0_40 bs0_40 bs0_39 .1
+Iphoto41 pd41 0 0.0
+X41 pd41 vr rst rg sg row41 br0_41 bs0_41 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_41 br0_41 0 1p
+Rbr0_41 br0_41 br0_40 .1
+Cbs0_41 bs0_41 0 1p
+Rbs0_41 bs0_41 bs0_40 .1
+Iphoto42 pd42 0 1.98e-08
+X42 pd42 vr rst rg sg row42 br0_42 bs0_42 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_42 br0_42 0 1p
+Rbr0_42 br0_42 br0_41 .1
+Cbs0_42 bs0_42 0 1p
+Rbs0_42 bs0_42 bs0_41 .1
+Iphoto43 pd43 0 0.0
+X43 pd43 vr rst rg sg row43 br0_43 bs0_43 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_43 br0_43 0 1p
+Rbr0_43 br0_43 br0_42 .1
+Cbs0_43 bs0_43 0 1p
+Rbs0_43 bs0_43 bs0_42 .1
+Iphoto44 pd44 0 1.98e-08
+X44 pd44 vr rst rg sg row44 br0_44 bs0_44 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_44 br0_44 0 1p
+Rbr0_44 br0_44 br0_43 .1
+Cbs0_44 bs0_44 0 1p
+Rbs0_44 bs0_44 bs0_43 .1
+Iphoto45 pd45 0 0.0
+X45 pd45 vr rst rg sg row45 br0_45 bs0_45 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_45 br0_45 0 1p
+Rbr0_45 br0_45 br0_44 .1
+Cbs0_45 bs0_45 0 1p
+Rbs0_45 bs0_45 bs0_44 .1
+Iphoto46 pd46 0 1.98e-08
+X46 pd46 vr rst rg sg row46 br0_46 bs0_46 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_46 br0_46 0 1p
+Rbr0_46 br0_46 br0_45 .1
+Cbs0_46 bs0_46 0 1p
+Rbs0_46 bs0_46 bs0_45 .1
+Iphoto47 pd47 0 0.0
+X47 pd47 vr rst rg sg row47 br0_47 bs0_47 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_47 br0_47 0 1p
+Rbr0_47 br0_47 br0_46 .1
+Cbs0_47 bs0_47 0 1p
+Rbs0_47 bs0_47 bs0_46 .1
+Iphoto48 pd48 0 1.98e-08
+X48 pd48 vr rst rg sg row48 br0_48 bs0_48 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_48 br0_48 0 1p
+Rbr0_48 br0_48 br0_47 .1
+Cbs0_48 bs0_48 0 1p
+Rbs0_48 bs0_48 bs0_47 .1
+Iphoto49 pd49 0 0.0
+X49 pd49 vr rst rg sg row49 br0_49 bs0_49 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_49 br0_49 0 1p
+Rbr0_49 br0_49 br0_48 .1
+Cbs0_49 bs0_49 0 1p
+Rbs0_49 bs0_49 bs0_48 .1
+Iphoto50 pd50 0 1.98e-08
+X50 pd50 vr rst rg sg row50 br0_50 bs0_50 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_50 br0_50 0 1p
+Rbr0_50 br0_50 br0_49 .1
+Cbs0_50 bs0_50 0 1p
+Rbs0_50 bs0_50 bs0_49 .1
+Iphoto51 pd51 0 0.0
+X51 pd51 vr rst rg sg row51 br0_51 bs0_51 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_51 br0_51 0 1p
+Rbr0_51 br0_51 br0_50 .1
+Cbs0_51 bs0_51 0 1p
+Rbs0_51 bs0_51 bs0_50 .1
+Iphoto52 pd52 0 1.98e-08
+X52 pd52 vr rst rg sg row52 br0_52 bs0_52 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_52 br0_52 0 1p
+Rbr0_52 br0_52 br0_51 .1
+Cbs0_52 bs0_52 0 1p
+Rbs0_52 bs0_52 bs0_51 .1
+Iphoto53 pd53 0 0.0
+X53 pd53 vr rst rg sg row53 br0_53 bs0_53 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_53 br0_53 0 1p
+Rbr0_53 br0_53 br0_52 .1
+Cbs0_53 bs0_53 0 1p
+Rbs0_53 bs0_53 bs0_52 .1
+Iphoto54 pd54 0 1.98e-08
+X54 pd54 vr rst rg sg row54 br0_54 bs0_54 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_54 br0_54 0 1p
+Rbr0_54 br0_54 br0_53 .1
+Cbs0_54 bs0_54 0 1p
+Rbs0_54 bs0_54 bs0_53 .1
+Iphoto55 pd55 0 0.0
+X55 pd55 vr rst rg sg row55 br0_55 bs0_55 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_55 br0_55 0 1p
+Rbr0_55 br0_55 br0_54 .1
+Cbs0_55 bs0_55 0 1p
+Rbs0_55 bs0_55 bs0_54 .1
+Iphoto56 pd56 0 1.98e-08
+X56 pd56 vr rst rg sg row56 br0_56 bs0_56 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_56 br0_56 0 1p
+Rbr0_56 br0_56 br0_55 .1
+Cbs0_56 bs0_56 0 1p
+Rbs0_56 bs0_56 bs0_55 .1
+Iphoto57 pd57 0 0.0
+X57 pd57 vr rst rg sg row57 br0_57 bs0_57 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_57 br0_57 0 1p
+Rbr0_57 br0_57 br0_56 .1
+Cbs0_57 bs0_57 0 1p
+Rbs0_57 bs0_57 bs0_56 .1
+Iphoto58 pd58 0 1.98e-08
+X58 pd58 vr rst rg sg row58 br0_58 bs0_58 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_58 br0_58 0 1p
+Rbr0_58 br0_58 br0_57 .1
+Cbs0_58 bs0_58 0 1p
+Rbs0_58 bs0_58 bs0_57 .1
+Iphoto59 pd59 0 0.0
+X59 pd59 vr rst rg sg row59 br0_59 bs0_59 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_59 br0_59 0 1p
+Rbr0_59 br0_59 br0_58 .1
+Cbs0_59 bs0_59 0 1p
+Rbs0_59 bs0_59 bs0_58 .1
+Iphoto60 pd60 0 1.98e-08
+X60 pd60 vr rst rg sg row60 br0_60 bs0_60 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_60 br0_60 0 1p
+Rbr0_60 br0_60 br0_59 .1
+Cbs0_60 bs0_60 0 1p
+Rbs0_60 bs0_60 bs0_59 .1
+Iphoto61 pd61 0 0.0
+X61 pd61 vr rst rg sg row61 br0_61 bs0_61 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_61 br0_61 0 1p
+Rbr0_61 br0_61 br0_60 .1
+Cbs0_61 bs0_61 0 1p
+Rbs0_61 bs0_61 bs0_60 .1
+Iphoto62 pd62 0 1.98e-08
+X62 pd62 vr rst rg sg row62 br0_62 bs0_62 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_62 br0_62 0 1p
+Rbr0_62 br0_62 br0_61 .1
+Cbs0_62 bs0_62 0 1p
+Rbs0_62 bs0_62 bs0_61 .1
+Iphoto63 pd63 0 0.0
+X63 pd63 vr rst rg sg row63 br0_63 bs0_63 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_63 br0_63 0 1p
+Rbr0_63 br0_63 br0_62 .1
+Cbs0_63 bs0_63 0 1p
+Rbs0_63 bs0_63 bs0_62 .1
+Iphoto64 pd64 0 1.98e-08
+X64 pd64 vr rst rg sg row64 br0_64 bs0_64 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_64 br0_64 0 1p
+Rbr0_64 br0_64 br0_63 .1
+Cbs0_64 bs0_64 0 1p
+Rbs0_64 bs0_64 bs0_63 .1
+Iphoto65 pd65 0 0.0
+X65 pd65 vr rst rg sg row65 br0_65 bs0_65 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_65 br0_65 0 1p
+Rbr0_65 br0_65 br0_64 .1
+Cbs0_65 bs0_65 0 1p
+Rbs0_65 bs0_65 bs0_64 .1
+Iphoto66 pd66 0 1.98e-08
+X66 pd66 vr rst rg sg row66 br0_66 bs0_66 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_66 br0_66 0 1p
+Rbr0_66 br0_66 br0_65 .1
+Cbs0_66 bs0_66 0 1p
+Rbs0_66 bs0_66 bs0_65 .1
+Iphoto67 pd67 0 0.0
+X67 pd67 vr rst rg sg row67 br0_67 bs0_67 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_67 br0_67 0 1p
+Rbr0_67 br0_67 br0_66 .1
+Cbs0_67 bs0_67 0 1p
+Rbs0_67 bs0_67 bs0_66 .1
+Iphoto68 pd68 0 1.98e-08
+X68 pd68 vr rst rg sg row68 br0_68 bs0_68 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_68 br0_68 0 1p
+Rbr0_68 br0_68 br0_67 .1
+Cbs0_68 bs0_68 0 1p
+Rbs0_68 bs0_68 bs0_67 .1
+Iphoto69 pd69 0 0.0
+X69 pd69 vr rst rg sg row69 br0_69 bs0_69 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_69 br0_69 0 1p
+Rbr0_69 br0_69 br0_68 .1
+Cbs0_69 bs0_69 0 1p
+Rbs0_69 bs0_69 bs0_68 .1
+Iphoto70 pd70 0 1.98e-08
+X70 pd70 vr rst rg sg row70 br0_70 bs0_70 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_70 br0_70 0 1p
+Rbr0_70 br0_70 br0_69 .1
+Cbs0_70 bs0_70 0 1p
+Rbs0_70 bs0_70 bs0_69 .1
+Iphoto71 pd71 0 0.0
+X71 pd71 vr rst rg sg row71 br0_71 bs0_71 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_71 br0_71 0 1p
+Rbr0_71 br0_71 br0_70 .1
+Cbs0_71 bs0_71 0 1p
+Rbs0_71 bs0_71 bs0_70 .1
+Iphoto72 pd72 0 1.98e-08
+X72 pd72 vr rst rg sg row72 br0_72 bs0_72 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_72 br0_72 0 1p
+Rbr0_72 br0_72 br0_71 .1
+Cbs0_72 bs0_72 0 1p
+Rbs0_72 bs0_72 bs0_71 .1
+Iphoto73 pd73 0 0.0
+X73 pd73 vr rst rg sg row73 br0_73 bs0_73 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_73 br0_73 0 1p
+Rbr0_73 br0_73 br0_72 .1
+Cbs0_73 bs0_73 0 1p
+Rbs0_73 bs0_73 bs0_72 .1
+Iphoto74 pd74 0 1.98e-08
+X74 pd74 vr rst rg sg row74 br0_74 bs0_74 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_74 br0_74 0 1p
+Rbr0_74 br0_74 br0_73 .1
+Cbs0_74 bs0_74 0 1p
+Rbs0_74 bs0_74 bs0_73 .1
+Iphoto75 pd75 0 0.0
+X75 pd75 vr rst rg sg row75 br0_75 bs0_75 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_75 br0_75 0 1p
+Rbr0_75 br0_75 br0_74 .1
+Cbs0_75 bs0_75 0 1p
+Rbs0_75 bs0_75 bs0_74 .1
+Iphoto76 pd76 0 1.98e-08
+X76 pd76 vr rst rg sg row76 br0_76 bs0_76 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_76 br0_76 0 1p
+Rbr0_76 br0_76 br0_75 .1
+Cbs0_76 bs0_76 0 1p
+Rbs0_76 bs0_76 bs0_75 .1
+Iphoto77 pd77 0 0.0
+X77 pd77 vr rst rg sg row77 br0_77 bs0_77 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_77 br0_77 0 1p
+Rbr0_77 br0_77 br0_76 .1
+Cbs0_77 bs0_77 0 1p
+Rbs0_77 bs0_77 bs0_76 .1
+Iphoto78 pd78 0 1.98e-08
+X78 pd78 vr rst rg sg row78 br0_78 bs0_78 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_78 br0_78 0 1p
+Rbr0_78 br0_78 br0_77 .1
+Cbs0_78 bs0_78 0 1p
+Rbs0_78 bs0_78 bs0_77 .1
+Iphoto79 pd79 0 0.0
+X79 pd79 vr rst rg sg row79 br0_79 bs0_79 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_79 br0_79 0 1p
+Rbr0_79 br0_79 br0_78 .1
+Cbs0_79 bs0_79 0 1p
+Rbs0_79 bs0_79 bs0_78 .1
+Iphoto80 pd80 0 1.98e-08
+X80 pd80 vr rst rg sg row80 br0_80 bs0_80 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_80 br0_80 0 1p
+Rbr0_80 br0_80 br0_79 .1
+Cbs0_80 bs0_80 0 1p
+Rbs0_80 bs0_80 bs0_79 .1
+Iphoto81 pd81 0 0.0
+X81 pd81 vr rst rg sg row81 br0_81 bs0_81 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_81 br0_81 0 1p
+Rbr0_81 br0_81 br0_80 .1
+Cbs0_81 bs0_81 0 1p
+Rbs0_81 bs0_81 bs0_80 .1
+Iphoto82 pd82 0 1.98e-08
+X82 pd82 vr rst rg sg row82 br0_82 bs0_82 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_82 br0_82 0 1p
+Rbr0_82 br0_82 br0_81 .1
+Cbs0_82 bs0_82 0 1p
+Rbs0_82 bs0_82 bs0_81 .1
+Iphoto83 pd83 0 0.0
+X83 pd83 vr rst rg sg row83 br0_83 bs0_83 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_83 br0_83 0 1p
+Rbr0_83 br0_83 br0_82 .1
+Cbs0_83 bs0_83 0 1p
+Rbs0_83 bs0_83 bs0_82 .1
+Iphoto84 pd84 0 1.98e-08
+X84 pd84 vr rst rg sg row84 br0_84 bs0_84 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_84 br0_84 0 1p
+Rbr0_84 br0_84 br0_83 .1
+Cbs0_84 bs0_84 0 1p
+Rbs0_84 bs0_84 bs0_83 .1
+Iphoto85 pd85 0 0.0
+X85 pd85 vr rst rg sg row85 br0_85 bs0_85 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_85 br0_85 0 1p
+Rbr0_85 br0_85 br0_84 .1
+Cbs0_85 bs0_85 0 1p
+Rbs0_85 bs0_85 bs0_84 .1
+Iphoto86 pd86 0 1.98e-08
+X86 pd86 vr rst rg sg row86 br0_86 bs0_86 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_86 br0_86 0 1p
+Rbr0_86 br0_86 br0_85 .1
+Cbs0_86 bs0_86 0 1p
+Rbs0_86 bs0_86 bs0_85 .1
+Iphoto87 pd87 0 0.0
+X87 pd87 vr rst rg sg row87 br0_87 bs0_87 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_87 br0_87 0 1p
+Rbr0_87 br0_87 br0_86 .1
+Cbs0_87 bs0_87 0 1p
+Rbs0_87 bs0_87 bs0_86 .1
+Iphoto88 pd88 0 1.98e-08
+X88 pd88 vr rst rg sg row88 br0_88 bs0_88 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_88 br0_88 0 1p
+Rbr0_88 br0_88 br0_87 .1
+Cbs0_88 bs0_88 0 1p
+Rbs0_88 bs0_88 bs0_87 .1
+Iphoto89 pd89 0 0.0
+X89 pd89 vr rst rg sg row89 br0_89 bs0_89 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_89 br0_89 0 1p
+Rbr0_89 br0_89 br0_88 .1
+Cbs0_89 bs0_89 0 1p
+Rbs0_89 bs0_89 bs0_88 .1
+Iphoto90 pd90 0 1.98e-08
+X90 pd90 vr rst rg sg row90 br0_90 bs0_90 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_90 br0_90 0 1p
+Rbr0_90 br0_90 br0_89 .1
+Cbs0_90 bs0_90 0 1p
+Rbs0_90 bs0_90 bs0_89 .1
+Iphoto91 pd91 0 0.0
+X91 pd91 vr rst rg sg row91 br0_91 bs0_91 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_91 br0_91 0 1p
+Rbr0_91 br0_91 br0_90 .1
+Cbs0_91 bs0_91 0 1p
+Rbs0_91 bs0_91 bs0_90 .1
+Iphoto92 pd92 0 1.98e-08
+X92 pd92 vr rst rg sg row92 br0_92 bs0_92 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_92 br0_92 0 1p
+Rbr0_92 br0_92 br0_91 .1
+Cbs0_92 bs0_92 0 1p
+Rbs0_92 bs0_92 bs0_91 .1
+Iphoto93 pd93 0 0.0
+X93 pd93 vr rst rg sg row93 br0_93 bs0_93 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_93 br0_93 0 1p
+Rbr0_93 br0_93 br0_92 .1
+Cbs0_93 bs0_93 0 1p
+Rbs0_93 bs0_93 bs0_92 .1
+Iphoto94 pd94 0 1.98e-08
+X94 pd94 vr rst rg sg row94 br0_94 bs0_94 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_94 br0_94 0 1p
+Rbr0_94 br0_94 br0_93 .1
+Cbs0_94 bs0_94 0 1p
+Rbs0_94 bs0_94 bs0_93 .1
+Iphoto95 pd95 0 0.0
+X95 pd95 vr rst rg sg row95 br0_95 bs0_95 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_95 br0_95 0 1p
+Rbr0_95 br0_95 br0_94 .1
+Cbs0_95 bs0_95 0 1p
+Rbs0_95 bs0_95 bs0_94 .1
+Iphoto96 pd96 0 1.98e-08
+X96 pd96 vr rst rg sg row96 br0_96 bs0_96 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_96 br0_96 0 1p
+Rbr0_96 br0_96 br0_95 .1
+Cbs0_96 bs0_96 0 1p
+Rbs0_96 bs0_96 bs0_95 .1
+Iphoto97 pd97 0 0.0
+X97 pd97 vr rst rg sg row97 br0_97 bs0_97 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_97 br0_97 0 1p
+Rbr0_97 br0_97 br0_96 .1
+Cbs0_97 bs0_97 0 1p
+Rbs0_97 bs0_97 bs0_96 .1
+Iphoto98 pd98 0 1.98e-08
+X98 pd98 vr rst rg sg row98 br0_98 bs0_98 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_98 br0_98 0 1p
+Rbr0_98 br0_98 br0_97 .1
+Cbs0_98 bs0_98 0 1p
+Rbs0_98 bs0_98 bs0_97 .1
+Iphoto99 pd99 0 0.0
+X99 pd99 vr rst rg sg row99 br0_99 bs0_99 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_99 br0_99 0 1p
+Rbr0_99 br0_99 br0_98 .1
+Cbs0_99 bs0_99 0 1p
+Rbs0_99 bs0_99 bs0_98 .1
+Iphoto100 pd100 0 1.98e-08
+X100 pd100 vr rst rg sg row100 br0_100 bs0_100 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_100 br0_100 0 1p
+Rbr0_100 br0_100 br0_99 .1
+Cbs0_100 bs0_100 0 1p
+Rbs0_100 bs0_100 bs0_99 .1
+Iphoto101 pd101 0 0.0
+X101 pd101 vr rst rg sg row101 br0_101 bs0_101 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_101 br0_101 0 1p
+Rbr0_101 br0_101 br0_100 .1
+Cbs0_101 bs0_101 0 1p
+Rbs0_101 bs0_101 bs0_100 .1
+Iphoto102 pd102 0 1.98e-08
+X102 pd102 vr rst rg sg row102 br0_102 bs0_102 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_102 br0_102 0 1p
+Rbr0_102 br0_102 br0_101 .1
+Cbs0_102 bs0_102 0 1p
+Rbs0_102 bs0_102 bs0_101 .1
+Iphoto103 pd103 0 0.0
+X103 pd103 vr rst rg sg row103 br0_103 bs0_103 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_103 br0_103 0 1p
+Rbr0_103 br0_103 br0_102 .1
+Cbs0_103 bs0_103 0 1p
+Rbs0_103 bs0_103 bs0_102 .1
+Iphoto104 pd104 0 1.98e-08
+X104 pd104 vr rst rg sg row104 br0_104 bs0_104 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_104 br0_104 0 1p
+Rbr0_104 br0_104 br0_103 .1
+Cbs0_104 bs0_104 0 1p
+Rbs0_104 bs0_104 bs0_103 .1
+Iphoto105 pd105 0 0.0
+X105 pd105 vr rst rg sg row105 br0_105 bs0_105 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_105 br0_105 0 1p
+Rbr0_105 br0_105 br0_104 .1
+Cbs0_105 bs0_105 0 1p
+Rbs0_105 bs0_105 bs0_104 .1
+Iphoto106 pd106 0 1.98e-08
+X106 pd106 vr rst rg sg row106 br0_106 bs0_106 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_106 br0_106 0 1p
+Rbr0_106 br0_106 br0_105 .1
+Cbs0_106 bs0_106 0 1p
+Rbs0_106 bs0_106 bs0_105 .1
+Iphoto107 pd107 0 0.0
+X107 pd107 vr rst rg sg row107 br0_107 bs0_107 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_107 br0_107 0 1p
+Rbr0_107 br0_107 br0_106 .1
+Cbs0_107 bs0_107 0 1p
+Rbs0_107 bs0_107 bs0_106 .1
+Iphoto108 pd108 0 1.98e-08
+X108 pd108 vr rst rg sg row108 br0_108 bs0_108 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_108 br0_108 0 1p
+Rbr0_108 br0_108 br0_107 .1
+Cbs0_108 bs0_108 0 1p
+Rbs0_108 bs0_108 bs0_107 .1
+Iphoto109 pd109 0 0.0
+X109 pd109 vr rst rg sg row109 br0_109 bs0_109 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_109 br0_109 0 1p
+Rbr0_109 br0_109 br0_108 .1
+Cbs0_109 bs0_109 0 1p
+Rbs0_109 bs0_109 bs0_108 .1
+Iphoto110 pd110 0 1.98e-08
+X110 pd110 vr rst rg sg row110 br0_110 bs0_110 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_110 br0_110 0 1p
+Rbr0_110 br0_110 br0_109 .1
+Cbs0_110 bs0_110 0 1p
+Rbs0_110 bs0_110 bs0_109 .1
+Iphoto111 pd111 0 0.0
+X111 pd111 vr rst rg sg row111 br0_111 bs0_111 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_111 br0_111 0 1p
+Rbr0_111 br0_111 br0_110 .1
+Cbs0_111 bs0_111 0 1p
+Rbs0_111 bs0_111 bs0_110 .1
+Iphoto112 pd112 0 1.98e-08
+X112 pd112 vr rst rg sg row112 br0_112 bs0_112 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_112 br0_112 0 1p
+Rbr0_112 br0_112 br0_111 .1
+Cbs0_112 bs0_112 0 1p
+Rbs0_112 bs0_112 bs0_111 .1
+Iphoto113 pd113 0 0.0
+X113 pd113 vr rst rg sg row113 br0_113 bs0_113 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_113 br0_113 0 1p
+Rbr0_113 br0_113 br0_112 .1
+Cbs0_113 bs0_113 0 1p
+Rbs0_113 bs0_113 bs0_112 .1
+Iphoto114 pd114 0 1.98e-08
+X114 pd114 vr rst rg sg row114 br0_114 bs0_114 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_114 br0_114 0 1p
+Rbr0_114 br0_114 br0_113 .1
+Cbs0_114 bs0_114 0 1p
+Rbs0_114 bs0_114 bs0_113 .1
+Iphoto115 pd115 0 0.0
+X115 pd115 vr rst rg sg row115 br0_115 bs0_115 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_115 br0_115 0 1p
+Rbr0_115 br0_115 br0_114 .1
+Cbs0_115 bs0_115 0 1p
+Rbs0_115 bs0_115 bs0_114 .1
+Iphoto116 pd116 0 1.98e-08
+X116 pd116 vr rst rg sg row116 br0_116 bs0_116 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_116 br0_116 0 1p
+Rbr0_116 br0_116 br0_115 .1
+Cbs0_116 bs0_116 0 1p
+Rbs0_116 bs0_116 bs0_115 .1
+Iphoto117 pd117 0 0.0
+X117 pd117 vr rst rg sg row117 br0_117 bs0_117 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_117 br0_117 0 1p
+Rbr0_117 br0_117 br0_116 .1
+Cbs0_117 bs0_117 0 1p
+Rbs0_117 bs0_117 bs0_116 .1
+Iphoto118 pd118 0 1.98e-08
+X118 pd118 vr rst rg sg row118 br0_118 bs0_118 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_118 br0_118 0 1p
+Rbr0_118 br0_118 br0_117 .1
+Cbs0_118 bs0_118 0 1p
+Rbs0_118 bs0_118 bs0_117 .1
+Iphoto119 pd119 0 0.0
+X119 pd119 vr rst rg sg row119 br0_119 bs0_119 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_119 br0_119 0 1p
+Rbr0_119 br0_119 br0_118 .1
+Cbs0_119 bs0_119 0 1p
+Rbs0_119 bs0_119 bs0_118 .1
+Iphoto120 pd120 0 1.98e-08
+X120 pd120 vr rst rg sg row120 br0_120 bs0_120 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_120 br0_120 0 1p
+Rbr0_120 br0_120 br0_119 .1
+Cbs0_120 bs0_120 0 1p
+Rbs0_120 bs0_120 bs0_119 .1
+Iphoto121 pd121 0 0.0
+X121 pd121 vr rst rg sg row121 br0_121 bs0_121 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_121 br0_121 0 1p
+Rbr0_121 br0_121 br0_120 .1
+Cbs0_121 bs0_121 0 1p
+Rbs0_121 bs0_121 bs0_120 .1
+Iphoto122 pd122 0 1.98e-08
+X122 pd122 vr rst rg sg row122 br0_122 bs0_122 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_122 br0_122 0 1p
+Rbr0_122 br0_122 br0_121 .1
+Cbs0_122 bs0_122 0 1p
+Rbs0_122 bs0_122 bs0_121 .1
+Iphoto123 pd123 0 0.0
+X123 pd123 vr rst rg sg row123 br0_123 bs0_123 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_123 br0_123 0 1p
+Rbr0_123 br0_123 br0_122 .1
+Cbs0_123 bs0_123 0 1p
+Rbs0_123 bs0_123 bs0_122 .1
+Iphoto124 pd124 0 1.98e-08
+X124 pd124 vr rst rg sg row124 br0_124 bs0_124 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_124 br0_124 0 1p
+Rbr0_124 br0_124 br0_123 .1
+Cbs0_124 bs0_124 0 1p
+Rbs0_124 bs0_124 bs0_123 .1
+Iphoto125 pd125 0 0.0
+X125 pd125 vr rst rg sg row125 br0_125 bs0_125 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_125 br0_125 0 1p
+Rbr0_125 br0_125 br0_124 .1
+Cbs0_125 bs0_125 0 1p
+Rbs0_125 bs0_125 bs0_124 .1
+Iphoto126 pd126 0 1.98e-08
+X126 pd126 vr rst rg sg row126 br0_126 bs0_126 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_126 br0_126 0 1p
+Rbr0_126 br0_126 br0_125 .1
+Cbs0_126 bs0_126 0 1p
+Rbs0_126 bs0_126 bs0_125 .1
+Iphoto127 pd127 0 0.0
+X127 pd127 vr rst rg sg row127 br0_127 bs0_127 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_127 br0_127 0 1p
+Rbr0_127 br0_127 br0_126 .1
+Cbs0_127 bs0_127 0 1p
+Rbs0_127 bs0_127 bs0_126 .1
+Rbr br vr 1G
+Rbs bs vr 1G
+Cbr br 0 5.9999999999999995e-12
+Cbs bs 0 5.9999999999999995e-12
+Xafe br bs nominal black high vp vn cds pga filtered adc chain
+.ends bank0
+.save v(adc0)
+.temp 27.0
+.options method=gear gmin=1e-15 reltol=2e-5 vntol=1e-7 abstol=1e-14
+.tran 4.000000000000001e-06 0.01515 0 0.0003333333333333333
+.end

@@ -1,0 +1,238 @@
+.title Discrete component global shutter
+Xb0 adc0 cds0 pga0 filtered0 br0 bs0 bank0
+* TL081 OPERATIONAL AMPLIFIER "MACROMODEL" SUBCIRCUIT
+* CREATED USING PARTS RELEASE 4.01 ON 06/16/89 AT 13:08
+* (REV N/A)      SUPPLY VOLTAGE: +/-15V
+* CONNECTIONS:   NON-INVERTING INPUT
+*                | INVERTING INPUT
+*                | | POSITIVE POWER SUPPLY
+*                | | | NEGATIVE POWER SUPPLY
+*                | | | | OUTPUT
+*                | | | | |
+.SUBCKT TL081    1 2 3 4 5
+*
+  C1   11 12 3.498E-12
+  C2    6  7 15.00E-12
+  DC    5 53 DX
+  DE   54  5 DX
+  DLP  90 91 DX
+  DLN  92 90 DX
+  DP    4  3 DX
+  Ehalf mid 0 3 0 .5
+Eground 99 mid 4 0 .5
+  Fsum0 7 99 VB 4.715meg
+Fsum1 7 99 VC -5meg
+Fsum2 7 99 VE 5meg
+Fsum3 7 99 VLP 5meg
+Fsum4 7 99 VLN -5meg
+  GA    6  0 11 12 282.8E-6
+  GCM   0  6 10 99 8.942E-9
+  ISS   3 10 DC 195.0E-6
+  HLIM 90  0 VLIM 1K
+  J1   11  2 10 JX
+  J2   12  1 10 JX
+  R2    6  9 100.0E3
+  RD1   4 11 3.536E3
+  RD2   4 12 3.536E3
+  RO1   8  5 150
+  RO2   7 99 150
+  RP    3  4 2.143E3
+  RSS  10 99 1.026E6
+  VB    9  0 DC 0
+  VC    3 53 DC 2.200
+  VE   54  4 DC 2.200
+  VLIM  7  8 DC 0
+  VLP  91  0 DC 25
+  VLN   0 92 DC 25
+.MODEL DX D(IS=800.0E-18)
+.MODEL JX PJF(IS=15.00E-12 BETA=270.1E-6 VTO=-1)
+.ENDS
+* ALD1106PBL. Published level-1 fit, overlap in F/m; terminal parasitics below.
+.model ald_n nmos(level=1 vto=.7 kp=245u gamma=.85 phi=.9 lambda=.029
++ cbd=.5p cbs=.5p cgdo=5n cgso=5n tox=30n is=10p tnom=25)
+.subckt pass a b g
+Mchannel a g b 0 ald_n w=20u l=10u
+Rgate g 0 10T
+Cpackage g 0 .6p
+.ends pass
+
+.subckt pin an ca params: idark=70p
+.model s5971 D(is={idark+1e-18} n=1.2 cjo=11.73p vj=.7 m=.5 rs=5 tnom=25)
+Dpin an ca s5971
+.ends pin
+* -*- spice -*-
+* http://www.nxp.com/documents/spice_model/1N4148.prm
+*
+*******************************************
+*
+* 1N4148
+* 
+* NXP Semiconductors
+* 
+* High-speed diodes
+* 
+* VRRM = 100V
+* IFRM = 450 mA 
+* trr  = 4ns
+* 
+* Package pinning does not match Spice model pinning.
+* Package: SOD 27
+* 
+* Package Pin 1 : Cathode
+* Package Pin 2 : Anode
+* 
+* Simulator: PSPICE
+*
+*******************************************
+*
+.SUBCKT 1N4148 1 2 
+*
+* The resistor R1 does not reflect 
+* a physical device. Instead it
+* improves modeling in the reverse 
+* mode of operation.
+*
+R1 1 2 5.827E+9 
+D1 1 2 1N4148
+*
+.MODEL 1N4148 D 
++ IS = 4.352E-9 
++ N = 1.906 
++ BV = 110 
++ IBV = 0.0001 
++ RS = 0.6458 
++ CJO = 7.048E-13 
++ VJ = 0.869 
++ M = 0.03 
++ FC = 0.5 
++ TT = 3.48E-9 
+.ENDS
+*
+
+
+.subckt pixel pd vr rst rg sg row br bs vp vn params: ci=100p ch=1n rl=1T dark=70p
+Xphoto 0 pd pin idark={dark}
+Cint pd 0 {ci}
+Rint pd 0 10T
+Xreset vr pd rst pass
+Xbuf pd out vp vn out TL081
+Risol out drive 100
+XsampleR drive hr rg pass
+XsampleS drive hs sg pass
+Chr hr 0 {ch}
+Chs hs 0 {ch}
+Rhr hr 0 {rl}
+Rhs hs 0 {rl}
+XrowR hr br row pass
+XrowS hs bs row pass
+.ends pixel
+
+
+.subckt chain br bs nominal black vhi vp vn cds pga filtered adc
+Xbr br rb vp vn rb TL081
+Xbs bs sb vp vn sb TL081
+Xcds rb ref vhi pass
+Xbypass nominal ref 0 pass
+Xlinear pga mode vhi pass
+Xcomp compout mode 0 pass
+
+Rp ref plus 100k
+Rb plus black 100k
+Rm sb minus 100k
+Rf cds minus 100k
+Xdiff plus minus vp vn cds TL081
+Xgain cds fb vp vn pga TL081
+Xbottom bot black 0 pass
+Rground fb bot 100k
+Rgain1 pga tap1 1
+Xgain1 tap1 fb vhi pass
+Rgain2 pga tap2 100000
+Xgain2 tap2 fb 0 pass
+Rgain4 pga tap4 300000
+Xgain4 tap4 fb 0 pass
+Rgain8 pga tap8 700000
+Xgain8 tap8 fb 0 pass
+Rgain16 pga tap16 1500000
+Xgain16 tap16 fb 0 pass
+
+Rcomp pga knee 10k
+Xdiode knee black 1N4148
+Xknee knee compout vp vn compout TL081
+Rfilter mode filt 10k
+Cfilter filt 0 5e-10
+Xfilter filt filtered vp vn filtered TL081
+Xdriver filtered driven vp vn driven TL081
+Riso driven adc 47
+Cadc adc 0 20p
+Radc adc 0 10meg
+.ends chain
+
+.subckt bank0 adc cds pga filtered br bs
+Vrail rail 0 5.0
+Vplus vp 0 7.5
+Vminus vn 0 -7.5
+Vlogic high 0 9
+Rvrtop rail wvr 4000.0
+Rvrbot wvr 0 6000.0
+Xvr wvr bufvr vp vn bufvr TL081
+Risovr bufvr vr 100
+
+Rnominaltop rail wnominal 4000.0
+Rnominalbot wnominal 0 6000.0
+Xnominal wnominal bufnominal vp vn bufnominal TL081
+Risonominal bufnominal nominal 100
+
+Rblacktop rail wblack 9800.0
+Rblackbot wblack 0 200.0
+Xblack wblack bufblack vp vn bufblack TL081
+Risoblack bufblack black 100
+
+Vrst srcrst 0 PWL(0 9 2e-05 9 2.002e-05 0)
+Rrst srcrst rst 33
+Vrg srcrg 0 PWL(0 0 1e-06 0 1.02e-06 9 2.5e-05 9 2.502e-05 0)
+Rrg srcrg rg 33
+Vsg srcsg 0 PWL(0 0 0.010017 0 0.01001702 9 0.010025 9 0.01002502 0)
+Rsg srcsg sg 33
+Vrow0 srcrow0 0 PWL(0 0 0.01003 0 0.01003002 9 0.0101099 9 0.01010992 0)
+Rrow0 srcrow0 row0 33
+Vrow1 srcrow1 0 PWL(0 0 0.01011 0 0.01011002 9 0.0101899 9 0.01018992 0)
+Rrow1 srcrow1 row1 33
+Vcol0 srccol0 0 PWL(0 0 0.01003 0 0.01003002 9 0.0100699 9 0.01006992 0 0.01011 0 0.01011002 9 0.0101499 9 0.01014992 0)
+Rcol0 srccol0 col0 33
+Xmuxbr0 br0_0 br col0 pass
+Xmuxbs0 bs0_0 bs col0 pass
+Iphoto0 pd0 0 0.0
+X0 pd0 vr rst rg sg row0 br0_0 bs0_0 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_0 br0_0 0 1p
+Cbs0_0 bs0_0 0 1p
+Iphoto2 pd2 0 1.98e-08
+X2 pd2 vr rst rg sg row1 br0_1 bs0_1 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr0_1 br0_1 0 1p
+Rbr0_1 br0_1 br0_0 .1
+Cbs0_1 bs0_1 0 1p
+Rbs0_1 bs0_1 bs0_0 .1
+Vcol1 srccol1 0 PWL(0 0 0.01007 0 0.01007002 9 0.0101099 9 0.01010992 0 0.01015 0 0.01015002 9 0.0101899 9 0.01018992 0)
+Rcol1 srccol1 col1 33
+Xmuxbr1 br1_0 br col1 pass
+Xmuxbs1 bs1_0 bs col1 pass
+Iphoto1 pd1 0 1.98e-08
+X1 pd1 vr rst rg sg row0 br1_0 bs1_0 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr1_0 br1_0 0 1p
+Cbs1_0 bs1_0 0 1p
+Iphoto3 pd3 0 0.0
+X3 pd3 vr rst rg sg row1 br1_1 bs1_1 vp vn pixel ci=1e-10 ch=1e-09 rl=1000000000000.0 dark=7e-11
+Cbr1_1 br1_1 0 1p
+Rbr1_1 br1_1 br1_0 .1
+Cbs1_1 bs1_1 0 1p
+Rbs1_1 bs1_1 bs1_0 .1
+Rbr br vr 1G
+Rbs bs vr 1G
+Cbr br 0 7e-12
+Cbs bs 0 7e-12
+Xafe br bs nominal black high vp vn cds pga filtered adc chain
+.ends bank0
+.save v(adc0) v(cds0) v(pga0) v(filtered0) v(br0) v(bs0) v(xb0.pd0) v(xb0.x0.hr) v(xb0.x0.hs)
+.temp 27.0
+.options method=gear gmin=1e-15 reltol=2e-5 vntol=1e-7 abstol=1e-14
+.tran 4.000000000000001e-06 0.010190000000000001 0 0.0003333333333333333
+.end

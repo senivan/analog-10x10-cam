@@ -1,0 +1,115 @@
+.title Global shutter discrete camera
+.subckt pixel pd vr rst refgate siggate sel br bs ci=100p ch=1n rl=1e12 dark=2p vos=100u
+
+Dphoto 0 pd silicon
+Cjunction pd 0 4p
+Cintegration pd 0 {ci}
+Rintegration pd 0 10T
+Idark pd 0 {dark}
+Ibias pd 0 0.2p
+Sreset pd vr rst 0 gate
+Bfollower buf 0 V=max(0.02,min(v(vdd)-0.02,v(pd)+vos))
+Rout buf drive 50
+
+Shr drive hr refgate 0 gate
+Chr hr 0 {ch}
+Rhr hr 0 {rl}
+Ihr hr 0 0.2p
+Ehr sourcehr 0 hr 0 1
+Routhr sourcehr pinhr 50
+Sreadhr pinhr br sel 0 gate
+
+Shs drive hs siggate 0 gate
+Chs hs 0 {ch}
+Rhs hs 0 {rl}
+Ihs hs 0 0.2p
+Ehs sourcehs 0 hs 0 1
+Rouths sourcehs pinhs 50
+Sreadhs pinhs bs sel 0 gate
+
+.ends pixel
+
+.subckt amp plus minus out
+
+* Dominant pole, 4 MHz GBW, 100k DC gain, 4 V/us slew, rail clamps
+Bgm 0 pole I=max(-400u,min(400u,2.513m*(v(plus,minus)+20u)))
+Rp pole 0 39.79meg
+Cp pole 0 100p
+Brails pole 0 I=(min(0,v(pole)-0.02)+max(0,v(pole)-v(vdd)+0.02))/2
+Ebuf drive 0 pole 0 1
+Rout drive out 10
+
+.ends amp
+Vdd vdd 0 5.0
+Vr vr 0 3.0
+Vrst rst 0 PWL(0 3.3 2.5e-05 3.3 2.502e-05 0)
+Vrg rg 0 PWL(0 0 5e-06 0 5.02e-06 3.3 2.4e-05 3.3 2.402e-05 0)
+Vsg sg 0 PWL(0 0 0.010017 0 0.01001702 3.3 0.010025 3.3 0.01002502 0)
+Iphoto0 pd0 0 2.0250000000000003e-09
+Vsel0 sel0 0 PWL(0 0 0.01003 0 0.01003002 3.3 0.0100699 3.3 0.01006992 0)
+X0 pd0 vr rst rg sg sel0 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+
+.global vdd
+.model gate SW(Ron=50 Roff=1e14 Vt=1.65 Vh=0.05)
+.model silicon D(Is=1e-14 N=1.2)
+
+* Voltage-controlled channel for static mode and feedback selections
+.subckt select a b control
+Bchannel a b I=v(a,b)*(v(control)>1.65 ? 0.02 : 1e-14)
+.ends select
+Vblack black 0 0.1
+Vnom nominal 0 3.0
+Vcds cg 0 3.3
+Vbypass bg 0 0
+Xref br ref cg select
+Xnom nominal ref bg select
+Rplus ref plus 1meg
+Rblack plus black 1meg
+Rminus bs minus 1meg
+Rdiff cds minus 1meg
+Xdiff plus minus cds amp
+Xgain cds fb pga amp
+Vmulti multi 0 0
+Xbottom bot black multi select
+Rg fb bot 9950
+Vg1 g1 0 3.3
+Rf1 pga tap1 0.01
+Xf1 tap1 fb g1 select
+Vg2 g2 0 0
+Rf2 pga tap2 9950
+Xf2 tap2 fb g2 select
+Vg4 g4 0 0
+Rf4 pga tap4 29950
+Xf4 tap4 fb g4 select
+Vg8 g8 0 0
+Rf8 pga tap8 69950
+Xf8 tap8 fb g8 select
+Vg16 g16 0 0
+Rf16 pga tap16 149950
+Xf16 tap16 fb g16 select
+
+.model comp D(Is=1n N=1.5)
+Rcomp pga knee 10k
+Dcomp knee black comp
+Xcomp knee compbuf compbuf amp
+Vlin lin 0 3.3
+Vlog logsel 0 0
+Xlin pga mode lin select
+Xlog compbuf mode logsel select
+Rfilter mode filt 9950
+Cfilter filt 0 1.9999999999999998e-10
+Xfilter filt filtered filtered amp
+Xdriver filtered driven driven amp
+Riso driven adc 47
+Cadc adc 0 20p
+Radc adc 0 10meg
+
+Rbr br 0 1T
+Rbs bs 0 1T
+Cbr br 0 30p
+Cbs bs 0 30p
+.temp 27
+.options gmin=1e-15 reltol=2e-5 abstol=1e-14 vntol=1e-7 method=gear
+.save v(pd0) v(x0.hr) v(x0.hs) v(br) v(bs) v(cds) v(pga) v(filtered) v(adc)
+.tran 4.000000000000001e-06 0.01007 0 0.0003333333333333333
+.end

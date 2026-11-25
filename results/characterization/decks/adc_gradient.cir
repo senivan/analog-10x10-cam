@@ -1,0 +1,208 @@
+.title Global shutter discrete camera
+.subckt pixel pd vr rst refgate siggate sel br bs ci=100p ch=1n rl=1e12 dark=2p vos=100u
+
+Dphoto 0 pd silicon
+Cjunction pd 0 4p
+Cintegration pd 0 {ci}
+Rintegration pd 0 10T
+Idark pd 0 {dark}
+Ibias pd 0 0.2p
+Sreset pd vr rst 0 gate
+Bfollower buf 0 V=max(0.02,min(v(vdd)-0.02,v(pd)+vos))
+Rout buf drive 50
+
+Shr drive hr refgate 0 gate
+Chr hr 0 {ch}
+Rhr hr 0 {rl}
+Ihr hr 0 0.2p
+Ehr sourcehr 0 hr 0 1
+Routhr sourcehr pinhr 50
+Sreadhr pinhr br sel 0 gate
+
+Shs drive hs siggate 0 gate
+Chs hs 0 {ch}
+Rhs hs 0 {rl}
+Ihs hs 0 0.2p
+Ehs sourcehs 0 hs 0 1
+Rouths sourcehs pinhs 50
+Sreadhs pinhs bs sel 0 gate
+
+.ends pixel
+
+.subckt amp plus minus out
+
+* Dominant pole, 4 MHz GBW, 100k DC gain, 4 V/us slew, rail clamps
+Bgm 0 pole I=max(-400u,min(400u,2.513m*(v(plus,minus)+20u)))
+Rp pole 0 39.79meg
+Cp pole 0 100p
+Brails pole 0 I=(min(0,v(pole)-0.02)+max(0,v(pole)-v(vdd)+0.02))/2
+Ebuf drive 0 pole 0 1
+Rout drive out 10
+
+.ends amp
+Vdd vdd 0 5.0
+Vr vr 0 3.0
+Vrst rst 0 PWL(0 3.3 2.5e-05 3.3 2.502e-05 0)
+Vrg rg 0 PWL(0 0 5e-06 0 5.02e-06 3.3 2.4e-05 3.3 2.402e-05 0)
+Vsg sg 0 PWL(0 0 0.010017 0 0.01001702 3.3 0.010025 3.3 0.01002502 0)
+Iphoto0 pd0 0 0.0
+Vsel0 sel0 0 PWL(0 0 0.01003 0 0.01003002 3.3 0.0100699 3.3 0.01006992 0)
+X0 pd0 vr rst rg sg sel0 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto1 pd1 0 6.532258064516128e-10
+Vsel1 sel1 0 PWL(0 0 0.01007 0 0.01007002 3.3 0.0101099 3.3 0.01010992 0)
+X1 pd1 vr rst rg sg sel1 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto2 pd2 0 1.3064516129032256e-09
+Vsel2 sel2 0 PWL(0 0 0.01011 0 0.01011002 3.3 0.0101499 3.3 0.01014992 0)
+X2 pd2 vr rst rg sg sel2 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto3 pd3 0 1.9596774193548385e-09
+Vsel3 sel3 0 PWL(0 0 0.01015 0 0.01015002 3.3 0.0101899 3.3 0.01018992 0)
+X3 pd3 vr rst rg sg sel3 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto4 pd4 0 2.612903225806451e-09
+Vsel4 sel4 0 PWL(0 0 0.01019 0 0.01019002 3.3 0.0102299 3.3 0.01022992 0)
+X4 pd4 vr rst rg sg sel4 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto5 pd5 0 3.2661290322580643e-09
+Vsel5 sel5 0 PWL(0 0 0.01023 0 0.01023002 3.3 0.0102699 3.3 0.01026992 0)
+X5 pd5 vr rst rg sg sel5 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto6 pd6 0 3.919354838709677e-09
+Vsel6 sel6 0 PWL(0 0 0.01027 0 0.01027002 3.3 0.0103099 3.3 0.01030992 0)
+X6 pd6 vr rst rg sg sel6 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto7 pd7 0 4.5725806451612905e-09
+Vsel7 sel7 0 PWL(0 0 0.01031 0 0.01031002 3.3 0.0103499 3.3 0.01034992 0)
+X7 pd7 vr rst rg sg sel7 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto8 pd8 0 5.225806451612902e-09
+Vsel8 sel8 0 PWL(0 0 0.01035 0 0.01035002 3.3 0.0103899 3.3 0.01038992 0)
+X8 pd8 vr rst rg sg sel8 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto9 pd9 0 5.879032258064517e-09
+Vsel9 sel9 0 PWL(0 0 0.01039 0 0.01039002 3.3 0.0104299 3.3 0.01042992 0)
+X9 pd9 vr rst rg sg sel9 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto10 pd10 0 6.532258064516129e-09
+Vsel10 sel10 0 PWL(0 0 0.01043 0 0.01043002 3.3 0.0104699 3.3 0.01046992 0)
+X10 pd10 vr rst rg sg sel10 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto11 pd11 0 7.185483870967742e-09
+Vsel11 sel11 0 PWL(0 0 0.01047 0 0.01047002 3.3 0.0105099 3.3 0.01050992 0)
+X11 pd11 vr rst rg sg sel11 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto12 pd12 0 7.838709677419354e-09
+Vsel12 sel12 0 PWL(0 0 0.01051 0 0.01051002 3.3 0.0105499 3.3 0.01054992 0)
+X12 pd12 vr rst rg sg sel12 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto13 pd13 0 8.49193548387097e-09
+Vsel13 sel13 0 PWL(0 0 0.01055 0 0.01055002 3.3 0.0105899 3.3 0.01058992 0)
+X13 pd13 vr rst rg sg sel13 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto14 pd14 0 9.145161290322581e-09
+Vsel14 sel14 0 PWL(0 0 0.01059 0 0.01059002 3.3 0.0106299 3.3 0.01062992 0)
+X14 pd14 vr rst rg sg sel14 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto15 pd15 0 9.798387096774195e-09
+Vsel15 sel15 0 PWL(0 0 0.01063 0 0.01063002 3.3 0.0106699 3.3 0.01066992 0)
+X15 pd15 vr rst rg sg sel15 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto16 pd16 0 1.0451612903225805e-08
+Vsel16 sel16 0 PWL(0 0 0.01067 0 0.01067002 3.3 0.0107099 3.3 0.01070992 0)
+X16 pd16 vr rst rg sg sel16 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto17 pd17 0 1.1104838709677418e-08
+Vsel17 sel17 0 PWL(0 0 0.01071 0 0.01071002 3.3 0.0107499 3.3 0.01074992 0)
+X17 pd17 vr rst rg sg sel17 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto18 pd18 0 1.1758064516129033e-08
+Vsel18 sel18 0 PWL(0 0 0.01075 0 0.01075002 3.3 0.0107899 3.3 0.01078992 0)
+X18 pd18 vr rst rg sg sel18 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto19 pd19 0 1.2411290322580645e-08
+Vsel19 sel19 0 PWL(0 0 0.01079 0 0.01079002 3.3 0.0108299 3.3 0.01082992 0)
+X19 pd19 vr rst rg sg sel19 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto20 pd20 0 1.3064516129032257e-08
+Vsel20 sel20 0 PWL(0 0 0.01083 0 0.01083002 3.3 0.0108699 3.3 0.01086992 0)
+X20 pd20 vr rst rg sg sel20 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto21 pd21 0 1.371774193548387e-08
+Vsel21 sel21 0 PWL(0 0 0.01087 0 0.01087002 3.3 0.0109099 3.3 0.01090992 0)
+X21 pd21 vr rst rg sg sel21 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto22 pd22 0 1.4370967741935484e-08
+Vsel22 sel22 0 PWL(0 0 0.01091 0 0.01091002 3.3 0.0109499 3.3 0.01094992 0)
+X22 pd22 vr rst rg sg sel22 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto23 pd23 0 1.5024193548387098e-08
+Vsel23 sel23 0 PWL(0 0 0.01095 0 0.01095002 3.3 0.0109899 3.3 0.01098992 0)
+X23 pd23 vr rst rg sg sel23 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto24 pd24 0 1.5677419354838708e-08
+Vsel24 sel24 0 PWL(0 0 0.01099 0 0.01099002 3.3 0.0110299 3.3 0.01102992 0)
+X24 pd24 vr rst rg sg sel24 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto25 pd25 0 1.633064516129032e-08
+Vsel25 sel25 0 PWL(0 0 0.01103 0 0.01103002 3.3 0.0110699 3.3 0.01106992 0)
+X25 pd25 vr rst rg sg sel25 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto26 pd26 0 1.698387096774194e-08
+Vsel26 sel26 0 PWL(0 0 0.01107 0 0.01107002 3.3 0.0111099 3.3 0.01110992 0)
+X26 pd26 vr rst rg sg sel26 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto27 pd27 0 1.763709677419355e-08
+Vsel27 sel27 0 PWL(0 0 0.01111 0 0.01111002 3.3 0.0111499 3.3 0.01114992 0)
+X27 pd27 vr rst rg sg sel27 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto28 pd28 0 1.8290322580645162e-08
+Vsel28 sel28 0 PWL(0 0 0.01115 0 0.01115002 3.3 0.0111899 3.3 0.01118992 0)
+X28 pd28 vr rst rg sg sel28 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto29 pd29 0 1.8943548387096772e-08
+Vsel29 sel29 0 PWL(0 0 0.01119 0 0.01119002 3.3 0.0112299 3.3 0.01122992 0)
+X29 pd29 vr rst rg sg sel29 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto30 pd30 0 1.959677419354839e-08
+Vsel30 sel30 0 PWL(0 0 0.01123 0 0.01123002 3.3 0.0112699 3.3 0.01126992 0)
+X30 pd30 vr rst rg sg sel30 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+Iphoto31 pd31 0 2.025e-08
+Vsel31 sel31 0 PWL(0 0 0.01127 0 0.01127002 3.3 0.0113099 3.3 0.01130992 0)
+X31 pd31 vr rst rg sg sel31 br bs pixel ch=1e-09 ci=1e-10 dark=2e-12 rl=1000000000000.0
+
+.global vdd
+.model gate SW(Ron=50 Roff=1e14 Vt=1.65 Vh=0.05)
+.model silicon D(Is=1e-14 N=1.2)
+
+* Voltage-controlled channel for static mode and feedback selections
+.subckt select a b control
+Bchannel a b I=v(a,b)*(v(control)>1.65 ? 0.02 : 1e-14)
+.ends select
+Vblack black 0 0.1
+Vnom nominal 0 3.0
+Vcds cg 0 3.3
+Vbypass bg 0 0
+Xref br ref cg select
+Xnom nominal ref bg select
+Rplus ref plus 1meg
+Rblack plus black 1meg
+Rminus bs minus 1meg
+Rdiff cds minus 1meg
+Xdiff plus minus cds amp
+Xgain cds fb pga amp
+Vmulti multi 0 0
+Xbottom bot black multi select
+Rg fb bot 9950
+Vg1 g1 0 3.3
+Rf1 pga tap1 0.01
+Xf1 tap1 fb g1 select
+Vg2 g2 0 0
+Rf2 pga tap2 9950
+Xf2 tap2 fb g2 select
+Vg4 g4 0 0
+Rf4 pga tap4 29950
+Xf4 tap4 fb g4 select
+Vg8 g8 0 0
+Rf8 pga tap8 69950
+Xf8 tap8 fb g8 select
+Vg16 g16 0 0
+Rf16 pga tap16 149950
+Xf16 tap16 fb g16 select
+
+.model comp D(Is=1n N=1.5)
+Rcomp pga knee 10k
+Dcomp knee black comp
+Xcomp knee compbuf compbuf amp
+Vlin lin 0 3.3
+Vlog logsel 0 0
+Xlin pga mode lin select
+Xlog compbuf mode logsel select
+Rfilter mode filt 9950
+Cfilter filt 0 1.9999999999999998e-10
+Xfilter filt filtered filtered amp
+Xdriver filtered driven driven amp
+Riso driven adc 47
+Cadc adc 0 20p
+Radc adc 0 10meg
+
+Rbr br 0 1T
+Rbs bs 0 1T
+Cbr br 0 30p
+Cbs bs 0 30p
+.temp 27.0
+.options gmin=1e-15 reltol=2e-5 abstol=1e-14 vntol=1e-7 method=gear
+.save v(pd0) v(x0.hr) v(x0.hs) v(br) v(bs) v(cds) v(pga) v(filtered) v(adc)
+.tran 4.000000000000001e-06 0.01131 0 0.0003333333333333333
+.end

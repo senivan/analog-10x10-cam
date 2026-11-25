@@ -1,0 +1,48 @@
+Pixel bench
+
+.global vdd
+.model gate SW(Ron=50 Roff=1e14 Vt=1.65 Vh=0.05)
+.model silicon D(Is=1e-14 N=1.2)
+.subckt pixel pd vr rst refgate siggate sel br bs ci=100p ch=1n rl=1e12 dark=2p vos=100u
+
+Dphoto 0 pd silicon
+Cjunction pd 0 4p
+Cintegration pd 0 {ci}
+Rintegration pd 0 10T
+Idark pd 0 {dark}
+Ibias pd 0 0.2p
+Sreset pd vr rst 0 gate
+Bfollower buf 0 V=max(0.02,min(v(vdd)-0.02,v(pd)+vos))
+Rout buf drive 50
+
+Shr drive hr refgate 0 gate
+Chr hr 0 {ch}
+Rhr hr 0 {rl}
+Ihr hr 0 0.2p
+Ehr sourcehr 0 hr 0 1
+Routhr sourcehr pinhr 50
+Sreadhr pinhr br sel 0 gate
+
+Shs drive hs siggate 0 gate
+Chs hs 0 {ch}
+Rhs hs 0 {rl}
+Ihs hs 0 0.2p
+Ehs sourcehs 0 hs 0 1
+Rouths sourcehs pinhs 50
+Sreadhs pinhs bs sel 0 gate
+
+.ends pixel
+
+Vdd vdd 0 5
+Vref vr 0 3
+Vrst rst 0 PWL(0 3.3 10u 3.3 10.02u 0)
+Iphoto pd 0 10n
+Vrg rg 0 PWL(0 3.3 9u 3.3 9.02u 0)
+Vsg sg 0 PWL(0 0 1.005m 0 1.00502m 3.3 1.010m 3.3 1.01002m 0)
+Vsel sel 0 3.3
+X0 pd vr rst rg sg sel br bs pixel
+Rbr br 0 1T
+Rbs bs 0 1T
+.save v(pd) v(br) v(bs)
+.tran 1u 1.02m
+.end

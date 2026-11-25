@@ -1,0 +1,10 @@
+[
+  {
+    "bank": 0,
+    "deck": "camera.bank0.cir"
+  },
+  {
+    "bank": 1,
+    "deck": "camera.bank1.cir"
+  }
+]

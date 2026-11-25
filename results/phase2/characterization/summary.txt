@@ -1,0 +1,10 @@
+100 pF, 10 ms full light gives 1.96578 V at the ADC. At 1 s it gives 3.20367 V.
+Full light, diode mode gives 0.6821, 0.6245, 0.5835 V at 0, 27, 50 °C.
+At τ=2 μs the bright-to-dark ADC residual goes from 799.11 mV at a 2 μs slot to 19.299 mV at 40 μs.
+Gain 16 measures 15.9632 V/V with 388.3 kHz bandwidth. Filter and driver cutoff is 77.5 kHz.
+A 100 mV reset sweep changes the bypass output by 100.279 mV and CDS output by 0.0014 mV.
+At 10 ms and 8×, the bright column reaches 5.8927 V and converts to code 4095.
+8-bit midpoint reconstruction RMS error on the 32 samples is 3.6811 mV.
+10-bit midpoint reconstruction RMS error on the 32 samples is 0.9256 mV.
+12-bit midpoint reconstruction RMS error on the 32 samples is 0.2109 mV.
+Maximum post-shutter inversion effect is 1.656 μV.

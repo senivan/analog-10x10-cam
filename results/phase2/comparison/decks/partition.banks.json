@@ -1,0 +1,10 @@
+[
+  {
+    "bank": 0,
+    "deck": "partition.bank0.cir"
+  },
+  {
+    "bank": 1,
+    "deck": "partition.bank1.cir"
+  }
+]

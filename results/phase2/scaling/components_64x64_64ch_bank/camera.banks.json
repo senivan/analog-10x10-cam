@@ -1,0 +1,258 @@
+[
+  {
+    "bank": 0,
+    "deck": "camera.bank0.cir"
+  },
+  {
+    "bank": 1,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 2,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 3,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 4,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 5,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 6,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 7,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 8,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 9,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 10,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 11,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 12,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 13,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 14,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 15,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 16,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 17,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 18,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 19,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 20,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 21,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 22,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 23,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 24,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 25,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 26,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 27,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 28,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 29,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 30,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 31,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 32,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 33,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 34,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 35,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 36,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 37,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 38,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 39,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 40,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 41,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 42,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 43,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 44,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 45,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 46,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 47,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 48,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 49,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 50,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 51,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 52,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 53,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 54,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 55,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 56,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 57,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 58,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 59,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 60,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 61,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 62,
+    "deck": "camera.bank2.cir"
+  },
+  {
+    "bank": 63,
+    "deck": "camera.bank1.cir"
+  }
+]

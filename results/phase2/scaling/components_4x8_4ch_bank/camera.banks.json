@@ -1,0 +1,18 @@
+[
+  {
+    "bank": 0,
+    "deck": "camera.bank0.cir"
+  },
+  {
+    "bank": 1,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 2,
+    "deck": "camera.bank1.cir"
+  },
+  {
+    "bank": 3,
+    "deck": "camera.bank1.cir"
+  }
+]

@@ -1,0 +1,1 @@
+"""Discrete photodiode camera simulation."""
